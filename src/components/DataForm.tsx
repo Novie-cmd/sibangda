@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { ConflictData, OrmasData, ForeignerData, ConflictHandlingData } from '../types';
-import { Save, AlertCircle, Globe, ShieldAlert, Users, Map } from 'lucide-react';
+import { Save, AlertCircle, Globe, ShieldAlert, Users, Map, Edit2, Trash2, X } from 'lucide-react';
 
 interface DataFormProps {
   onUpdateConflict: (data: ConflictData) => void;
+  onDeleteConflict: (id: string) => void;
   onAddOrmas: (data: OrmasData) => void;
+  onDeleteOrmas: (id: string) => void;
   onUpdateWasnas: (data: ForeignerData) => void;
+  onDeleteWasnas: (id: string) => void;
   onUpdateHandling: (data: ConflictHandlingData) => void;
+  onDeleteHandling: (id: string) => void;
   conflictData: ConflictData[];
   ormasData: OrmasData[];
   wasnasData: ForeignerData[];
@@ -15,20 +19,25 @@ interface DataFormProps {
 
 export const DataForm: React.FC<DataFormProps> = ({ 
   onUpdateConflict, 
+  onDeleteConflict,
   onAddOrmas,
+  onDeleteOrmas,
   onUpdateWasnas,
+  onDeleteWasnas,
   onUpdateHandling,
+  onDeleteHandling,
   conflictData,
   ormasData,
   wasnasData,
   handlingData
 }) => {
   const [activeTab, setActiveTab] = useState<'conflict' | 'ormas' | 'wasnas' | 'handling'>('conflict');
+  const [editingId, setEditingId] = useState<string | null>(null);
   
   const districts = ['Mataram', 'Lombok Barat', 'Lombok Tengah', 'Lombok Timur', 'Lombok Utara', 'Sumbawa Barat', 'Sumbawa', 'Dompu', 'Bima', 'Kota Bima'];
 
-  // Forms State
-  const [conflictForm, setConflictForm] = useState<ConflictData>({ 
+  const initialConflict: ConflictData = { 
+    id: '',
     district: 'Mataram', 
     level: 'Low', 
     incidents: 0, 
@@ -36,8 +45,10 @@ export const DataForm: React.FC<DataFormProps> = ({
     locationDetail: '',
     incidentTime: '',
     participantsCount: 0
-  });
-  const [ormasForm, setOrmasForm] = useState<Partial<OrmasData>>({ 
+  };
+
+  const initialOrmas: Partial<OrmasData> = { 
+    id: '',
     name: '', 
     category: 'Sosial', 
     district: 'Mataram', 
@@ -45,15 +56,19 @@ export const DataForm: React.FC<DataFormProps> = ({
     memberCount: 0,
     leaderName: '',
     address: ''
-  });
-  const [wasnasForm, setWasnasForm] = useState<ForeignerData>({ 
+  };
+
+  const initialWasnas: ForeignerData = { 
+    id: '',
     district: 'Mataram', 
     count: 0, 
     institutions: 0,
     locationDetail: '',
     activityDescription: ''
-  });
-  const [handlingForm, setHandlingForm] = useState<ConflictHandlingData>({ 
+  };
+
+  const initialHandling: ConflictHandlingData = { 
+    id: '',
     district: 'Mataram', 
     status: 'Pending', 
     cases: 0, 
@@ -61,17 +76,55 @@ export const DataForm: React.FC<DataFormProps> = ({
     locationDetail: '',
     incidentTime: '',
     participantsCount: 0
-  });
+  };
+
+  // Forms State
+  const [conflictForm, setConflictForm] = useState<ConflictData>(initialConflict);
+  const [ormasForm, setOrmasForm] = useState<Partial<OrmasData>>(initialOrmas);
+  const [wasnasForm, setWasnasForm] = useState<ForeignerData>(initialWasnas);
+  const [handlingForm, setHandlingForm] = useState<ConflictHandlingData>(initialHandling);
+
+  const resetForms = () => {
+    setConflictForm(initialConflict);
+    setOrmasForm(initialOrmas);
+    setWasnasForm(initialWasnas);
+    setHandlingForm(initialHandling);
+    setEditingId(null);
+  };
+
+  const handleEdit = (type: string, data: any) => {
+    setEditingId(data.id);
+    switch(type) {
+      case 'conflict': setConflictForm(data); break;
+      case 'ormas': setOrmasForm(data); break;
+      case 'wasnas': setWasnasForm(data); break;
+      case 'handling': setHandlingForm(data); break;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = (type: string, id: string) => {
+    if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+      switch(type) {
+        case 'conflict': onDeleteConflict(id); break;
+        case 'ormas': onDeleteOrmas(id); break;
+        case 'wasnas': onDeleteWasnas(id); break;
+        case 'handling': onDeleteHandling(id); break;
+      }
+    }
+  };
 
   const handleSubmit = (type: string, e: React.FormEvent) => {
     e.preventDefault();
+    const id = editingId || Math.random().toString(36).substr(2, 9);
     switch(type) {
-      case 'conflict': onUpdateConflict(conflictForm); break;
-      case 'ormas': onAddOrmas({ ...ormasForm, id: Math.random().toString(36).substr(2, 9) } as OrmasData); break;
-      case 'wasnas': onUpdateWasnas(wasnasForm); break;
-      case 'handling': onUpdateHandling(handlingForm); break;
+      case 'conflict': onUpdateConflict({ ...conflictForm, id }); break;
+      case 'ormas': onAddOrmas({ ...ormasForm, id } as OrmasData); break;
+      case 'wasnas': onUpdateWasnas({ ...wasnasForm, id }); break;
+      case 'handling': onUpdateHandling({ ...handlingForm, id }); break;
     }
-    alert('Data berhasil diperbarui!');
+    resetForms();
+    alert(editingId ? 'Data berhasil diperbarui!' : 'Data berhasil ditambahkan!');
   };
 
   const tabs = [
@@ -138,9 +191,16 @@ export const DataForm: React.FC<DataFormProps> = ({
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uraian Kejadian / Keterangan Situasi</label>
                 <textarea value={conflictForm.description} onChange={(e) => setConflictForm({...conflictForm, description: e.target.value})} rows={3} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Detail kondisi lapangan..." />
               </div>
-              <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center space-x-2">
-                <Save size={20} /><span>Simpan Data Potensi</span>
-              </button>
+              <div className="flex gap-4">
+                <button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center space-x-2">
+                  <Save size={20} /><span>{editingId ? 'Perbarui Data' : 'Simpan Data Potensi'}</span>
+                </button>
+                {editingId && (
+                  <button type="button" onClick={resetForms} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition-all flex items-center justify-center">
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
             </form>
           )}
 
@@ -180,9 +240,16 @@ export const DataForm: React.FC<DataFormProps> = ({
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tindakan Terakhir / Langkah Penanganan</label>
                 <input type="text" value={handlingForm.lastAction} onChange={(e) => setHandlingForm({...handlingForm, lastAction: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Contoh: Mediasi warga, koordinasi aparat..." />
               </div>
-              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center space-x-2">
-                <Save size={20} /><span>Update Status Penanganan</span>
-              </button>
+              <div className="flex gap-4">
+                <button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center space-x-2">
+                  <Save size={20} /><span>{editingId ? 'Perbarui Status' : 'Update Status Penanganan'}</span>
+                </button>
+                {editingId && (
+                  <button type="button" onClick={resetForms} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition-all flex items-center justify-center">
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
             </form>
           )}
 
@@ -212,9 +279,16 @@ export const DataForm: React.FC<DataFormProps> = ({
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uraian Aktivitas / Keterangan</label>
                 <textarea value={wasnasForm.activityDescription} onChange={(e) => setWasnasForm({...wasnasForm, activityDescription: e.target.value})} rows={2} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Tujuan kunjungan, kegiatan, dll..." />
               </div>
-              <button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-purple-200 transition-all flex items-center justify-center space-x-2">
-                <Save size={20} /><span>Update Data Wasnas</span>
-              </button>
+              <div className="flex gap-4">
+                <button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-purple-200 transition-all flex items-center justify-center space-x-2">
+                  <Save size={20} /><span>{editingId ? 'Perbarui Data' : 'Update Data Wasnas'}</span>
+                </button>
+                {editingId && (
+                  <button type="button" onClick={resetForms} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition-all flex items-center justify-center">
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
             </form>
           )}
 
@@ -250,9 +324,16 @@ export const DataForm: React.FC<DataFormProps> = ({
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat Sekretariat</label>
                 <textarea value={ormasForm.address} onChange={(e) => setOrmasForm({...ormasForm, address: e.target.value})} rows={2} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Alamat lengkap..." />
               </div>
-              <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center space-x-2">
-                <Save size={20} /><span>Daftarkan Ormas Baru</span>
-              </button>
+              <div className="flex gap-4">
+                <button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center space-x-2">
+                  <Save size={20} /><span>{editingId ? 'Perbarui Data' : 'Daftarkan Ormas Baru'}</span>
+                </button>
+                {editingId && (
+                  <button type="button" onClick={resetForms} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition-all flex items-center justify-center">
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
             </form>
           )}
         </div>
@@ -281,6 +362,7 @@ export const DataForm: React.FC<DataFormProps> = ({
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Waktu</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tingkat</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aksi (Orang)</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
                   </>
                 )}
                 {activeTab === 'handling' && (
@@ -289,6 +371,7 @@ export const DataForm: React.FC<DataFormProps> = ({
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kasus</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tindakan</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
                   </>
                 )}
                 {activeTab === 'wasnas' && (
@@ -296,6 +379,7 @@ export const DataForm: React.FC<DataFormProps> = ({
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Orang Asing</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lembaga</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
                   </>
                 )}
                 {activeTab === 'ormas' && (
@@ -304,6 +388,7 @@ export const DataForm: React.FC<DataFormProps> = ({
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ketua</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kategori</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Anggota</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
                   </>
                 )}
               </tr>
@@ -322,10 +407,20 @@ export const DataForm: React.FC<DataFormProps> = ({
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.participantsCount || 0}</td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button onClick={() => handleEdit('conflict', item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <Edit2 size={14} />
+                      </button>
+                      <button onClick={() => handleDelete('conflict', item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {activeTab === 'handling' && handlingData.map((item, idx) => (
-                <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                <tr key={item.id || idx} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-slate-700">{item.district}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.locationDetail || '-'}</td>
                   <td className="px-6 py-4">
@@ -337,23 +432,53 @@ export const DataForm: React.FC<DataFormProps> = ({
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.cases}</td>
                   <td className="px-6 py-4 text-sm text-slate-500">{item.lastAction}</td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button onClick={() => handleEdit('handling', item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <Edit2 size={14} />
+                      </button>
+                      <button onClick={() => handleDelete('handling', item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {activeTab === 'wasnas' && wasnasData.map((item, idx) => (
-                <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                <tr key={item.id || idx} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-slate-700">{item.district}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.locationDetail || '-'}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.count}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.institutions}</td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button onClick={() => handleEdit('wasnas', item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <Edit2 size={14} />
+                      </button>
+                      <button onClick={() => handleDelete('wasnas', item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {activeTab === 'ormas' && ormasData.map((item, idx) => (
-                <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                <tr key={item.id || idx} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-slate-700">{item.district}</td>
                   <td className="px-6 py-4 text-sm text-slate-700 font-bold">{item.name}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.leaderName || '-'}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.category}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.memberCount}</td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button onClick={() => handleEdit('ormas', item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <Edit2 size={14} />
+                      </button>
+                      <button onClick={() => handleDelete('ormas', item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

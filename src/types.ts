@@ -14,6 +14,7 @@ export interface CaseDetail {
 }
 
 export interface ConflictData {
+  id: string;
   district: string;
   level: 'Low' | 'Medium' | 'High';
   incidents: number;
@@ -25,6 +26,7 @@ export interface ConflictData {
 }
 
 export interface ConflictHandlingData {
+  id: string;
   district: string;
   status: 'Resolved' | 'In Progress' | 'Pending';
   cases: number;
@@ -36,6 +38,7 @@ export interface ConflictHandlingData {
 }
 
 export interface ForeignerData {
+  id: string;
   district: string;
   count: number;
   institutions: number;

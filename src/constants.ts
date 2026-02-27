@@ -2,6 +2,7 @@ import { ConflictData, OrmasData, ConflictHandlingData, ForeignerData } from './
 
 export const INITIAL_CONFLICT_DATA: ConflictData[] = [
   { 
+    id: 'c1',
     district: 'Mataram', 
     level: 'Low', 
     incidents: 2, 
@@ -11,8 +12,9 @@ export const INITIAL_CONFLICT_DATA: ConflictData[] = [
       { location: 'Kec. Ampenan', time: '20 Feb 2024', description: 'Kericuhan parkir', remarks: 'Terkendali' }
     ]
   },
-  { district: 'Lombok Barat', level: 'Low', incidents: 1, description: 'Stabil' },
+  { id: 'c2', district: 'Lombok Barat', level: 'Low', incidents: 1, description: 'Stabil' },
   { 
+    id: 'c3',
     district: 'Lombok Tengah', 
     level: 'Medium', 
     incidents: 5, 
@@ -22,17 +24,18 @@ export const INITIAL_CONFLICT_DATA: ConflictData[] = [
       { location: 'Kec. Pujut', time: '15 Feb 2024', description: 'Protes warga lokal', remarks: 'Pendampingan aparat' }
     ]
   },
-  { district: 'Lombok Timur', level: 'Medium', incidents: 4, description: 'Gesekan antar pemuda' },
-  { district: 'Lombok Utara', level: 'Low', incidents: 0, description: 'Aman' },
-  { district: 'Sumbawa Barat', level: 'Low', incidents: 1, description: 'Terkendali' },
-  { district: 'Sumbawa', level: 'Medium', incidents: 3, description: 'Isu lingkungan' },
-  { district: 'Dompu', level: 'High', incidents: 8, description: 'Konflik batas wilayah' },
-  { district: 'Bima', level: 'High', incidents: 12, description: 'Rawan konflik sosial' },
-  { district: 'Kota Bima', level: 'Medium', incidents: 6, description: 'Aksi unjuk rasa' },
+  { id: 'c4', district: 'Lombok Timur', level: 'Medium', incidents: 4, description: 'Gesekan antar pemuda' },
+  { id: 'c5', district: 'Lombok Utara', level: 'Low', incidents: 0, description: 'Aman' },
+  { id: 'c6', district: 'Sumbawa Barat', level: 'Low', incidents: 1, description: 'Terkendali' },
+  { id: 'c7', district: 'Sumbawa', level: 'Medium', incidents: 3, description: 'Isu lingkungan' },
+  { id: 'c8', district: 'Dompu', level: 'High', incidents: 8, description: 'Konflik batas wilayah' },
+  { id: 'c9', district: 'Bima', level: 'High', incidents: 12, description: 'Rawan konflik sosial' },
+  { id: 'c10', district: 'Kota Bima', level: 'Medium', incidents: 6, description: 'Aksi unjuk rasa' },
 ];
 
 export const INITIAL_CONFLICT_HANDLING_DATA: ConflictHandlingData[] = [
   { 
+    id: 'h1',
     district: 'Mataram', 
     status: 'Resolved', 
     cases: 2, 
@@ -41,8 +44,9 @@ export const INITIAL_CONFLICT_HANDLING_DATA: ConflictHandlingData[] = [
       { location: 'Pasar Mandalika', time: '14 Feb 2024', description: 'Sengketa lapak', action: 'Mediasi Polsek', remarks: 'Selesai' }
     ]
   },
-  { district: 'Lombok Barat', status: 'Resolved', cases: 1, lastAction: 'Koordinasi aparat' },
+  { id: 'h2', district: 'Lombok Barat', status: 'Resolved', cases: 1, lastAction: 'Koordinasi aparat' },
   { 
+    id: 'h3',
     district: 'Lombok Tengah', 
     status: 'In Progress', 
     cases: 5, 
@@ -52,26 +56,26 @@ export const INITIAL_CONFLICT_HANDLING_DATA: ConflictHandlingData[] = [
       { location: 'Desa Rembitan', time: '18 Feb 2024', description: 'Sengketa waris', action: 'Pendampingan hukum', remarks: 'Berjalan' }
     ]
   },
-  { district: 'Lombok Timur', status: 'In Progress', cases: 4, lastAction: 'Dialog komunitas' },
-  { district: 'Lombok Utara', status: 'Resolved', cases: 0, lastAction: 'Pemantauan rutin' },
-  { district: 'Sumbawa Barat', status: 'Resolved', cases: 1, lastAction: 'Sosialisasi' },
-  { district: 'Sumbawa', status: 'Pending', cases: 3, lastAction: 'Identifikasi awal' },
-  { district: 'Dompu', status: 'In Progress', cases: 8, lastAction: 'Pengamanan lokasi' },
-  { district: 'Bima', status: 'In Progress', cases: 12, lastAction: 'Operasi gabungan' },
-  { district: 'Kota Bima', status: 'Resolved', cases: 6, lastAction: 'Kesepakatan damai' },
+  { id: 'h4', district: 'Lombok Timur', status: 'In Progress', cases: 4, lastAction: 'Dialog komunitas' },
+  { id: 'h5', district: 'Lombok Utara', status: 'Resolved', cases: 0, lastAction: 'Pemantauan rutin' },
+  { id: 'h6', district: 'Sumbawa Barat', status: 'Resolved', cases: 1, lastAction: 'Sosialisasi' },
+  { id: 'h7', district: 'Sumbawa', status: 'Pending', cases: 3, lastAction: 'Identifikasi awal' },
+  { id: 'h8', district: 'Dompu', status: 'In Progress', cases: 8, lastAction: 'Pengamanan lokasi' },
+  { id: 'h9', district: 'Bima', status: 'In Progress', cases: 12, lastAction: 'Operasi gabungan' },
+  { id: 'h10', district: 'Kota Bima', status: 'Resolved', cases: 6, lastAction: 'Kesepakatan damai' },
 ];
 
 export const INITIAL_FOREIGNER_DATA: ForeignerData[] = [
-  { district: 'Mataram', count: 120, institutions: 15 },
-  { district: 'Lombok Barat', count: 450, institutions: 8 },
-  { district: 'Lombok Tengah', count: 320, institutions: 12 },
-  { district: 'Lombok Timur', count: 85, institutions: 4 },
-  { district: 'Lombok Utara', count: 600, institutions: 25 },
-  { district: 'Sumbawa Barat', count: 150, institutions: 2 },
-  { district: 'Sumbawa', count: 40, institutions: 3 },
-  { district: 'Dompu', count: 12, institutions: 1 },
-  { district: 'Bima', count: 8, institutions: 1 },
-  { district: 'Kota Bima', count: 25, institutions: 2 },
+  { id: 'f1', district: 'Mataram', count: 120, institutions: 15 },
+  { id: 'f2', district: 'Lombok Barat', count: 450, institutions: 8 },
+  { id: 'f3', district: 'Lombok Tengah', count: 320, institutions: 12 },
+  { id: 'f4', district: 'Lombok Timur', count: 85, institutions: 4 },
+  { id: 'f5', district: 'Lombok Utara', count: 600, institutions: 25 },
+  { id: 'f6', district: 'Sumbawa Barat', count: 150, institutions: 2 },
+  { id: 'f7', district: 'Sumbawa', count: 40, institutions: 3 },
+  { id: 'f8', district: 'Dompu', count: 12, institutions: 1 },
+  { id: 'f9', district: 'Bima', count: 8, institutions: 1 },
+  { id: 'f10', district: 'Kota Bima', count: 25, institutions: 2 },
 ];
 
 export const INITIAL_ORMAS_DATA: OrmasData[] = [

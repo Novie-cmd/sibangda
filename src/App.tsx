@@ -18,19 +18,59 @@ export default function App() {
   const [foreignerData, setForeignerData] = useState<ForeignerData[]>(INITIAL_FOREIGNER_DATA);
 
   const handleUpdateConflict = (newData: ConflictData) => {
-    setConflictData(prev => prev.map(item => item.district === newData.district ? newData : item));
+    setConflictData(prev => {
+      const exists = prev.find(item => item.id === newData.id);
+      if (exists) {
+        return prev.map(item => item.id === newData.id ? newData : item);
+      }
+      return [newData, ...prev];
+    });
+  };
+
+  const handleDeleteConflict = (id: string) => {
+    setConflictData(prev => prev.filter(item => item.id !== id));
   };
 
   const handleAddOrmas = (newOrmas: OrmasData) => {
-    setOrmasData(prev => [newOrmas, ...prev]);
+    setOrmasData(prev => {
+      const exists = prev.find(item => item.id === newOrmas.id);
+      if (exists) {
+        return prev.map(item => item.id === newOrmas.id ? newOrmas : item);
+      }
+      return [newOrmas, ...prev];
+    });
+  };
+
+  const handleDeleteOrmas = (id: string) => {
+    setOrmasData(prev => prev.filter(item => item.id !== id));
   };
 
   const handleUpdateWasnas = (newData: ForeignerData) => {
-    setForeignerData(prev => prev.map(item => item.district === newData.district ? newData : item));
+    setForeignerData(prev => {
+      const exists = prev.find(item => item.id === newData.id);
+      if (exists) {
+        return prev.map(item => item.id === newData.id ? newData : item);
+      }
+      return [newData, ...prev];
+    });
+  };
+
+  const handleDeleteWasnas = (id: string) => {
+    setForeignerData(prev => prev.filter(item => item.id !== id));
   };
 
   const handleUpdateHandling = (newData: ConflictHandlingData) => {
-    setHandlingData(prev => prev.map(item => item.district === newData.district ? newData : item));
+    setHandlingData(prev => {
+      const exists = prev.find(item => item.id === newData.id);
+      if (exists) {
+        return prev.map(item => item.id === newData.id ? newData : item);
+      }
+      return [newData, ...prev];
+    });
+  };
+
+  const handleDeleteHandling = (id: string) => {
+    setHandlingData(prev => prev.filter(item => item.id !== id));
   };
 
   const renderView = () => {
@@ -42,9 +82,13 @@ export default function App() {
       case 'input': return (
         <DataForm 
           onUpdateConflict={handleUpdateConflict} 
+          onDeleteConflict={handleDeleteConflict}
           onAddOrmas={handleAddOrmas}
+          onDeleteOrmas={handleDeleteOrmas}
           onUpdateWasnas={handleUpdateWasnas}
+          onDeleteWasnas={handleDeleteWasnas}
           onUpdateHandling={handleUpdateHandling}
+          onDeleteHandling={handleDeleteHandling}
           conflictData={conflictData}
           ormasData={ormasData}
           wasnasData={foreignerData}
