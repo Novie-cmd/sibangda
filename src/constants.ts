@@ -1,9 +1,27 @@
 import { ConflictData, OrmasData, ConflictHandlingData, ForeignerData } from './types';
 
 export const INITIAL_CONFLICT_DATA: ConflictData[] = [
-  { district: 'Mataram', level: 'Low', incidents: 2, description: 'Situasi kondusif' },
+  { 
+    district: 'Mataram', 
+    level: 'Low', 
+    incidents: 2, 
+    description: 'Situasi kondusif',
+    details: [
+      { location: 'Kec. Mataram', time: '12 Feb 2024', description: 'Gesekan kecil antar pedagang', remarks: 'Selesai dimediasi' },
+      { location: 'Kec. Ampenan', time: '20 Feb 2024', description: 'Kericuhan parkir', remarks: 'Terkendali' }
+    ]
+  },
   { district: 'Lombok Barat', level: 'Low', incidents: 1, description: 'Stabil' },
-  { district: 'Lombok Tengah', level: 'Medium', incidents: 5, description: 'Potensi sengketa lahan' },
+  { 
+    district: 'Lombok Tengah', 
+    level: 'Medium', 
+    incidents: 5, 
+    description: 'Potensi sengketa lahan',
+    details: [
+      { location: 'Desa Kuta', time: '10 Feb 2024', description: 'Klaim lahan sirkuit', remarks: 'Proses negosiasi' },
+      { location: 'Kec. Pujut', time: '15 Feb 2024', description: 'Protes warga lokal', remarks: 'Pendampingan aparat' }
+    ]
+  },
   { district: 'Lombok Timur', level: 'Medium', incidents: 4, description: 'Gesekan antar pemuda' },
   { district: 'Lombok Utara', level: 'Low', incidents: 0, description: 'Aman' },
   { district: 'Sumbawa Barat', level: 'Low', incidents: 1, description: 'Terkendali' },
@@ -14,9 +32,26 @@ export const INITIAL_CONFLICT_DATA: ConflictData[] = [
 ];
 
 export const INITIAL_CONFLICT_HANDLING_DATA: ConflictHandlingData[] = [
-  { district: 'Mataram', status: 'Resolved', cases: 2, lastAction: 'Mediasi selesai' },
+  { 
+    district: 'Mataram', 
+    status: 'Resolved', 
+    cases: 2, 
+    lastAction: 'Mediasi selesai',
+    details: [
+      { location: 'Pasar Mandalika', time: '14 Feb 2024', description: 'Sengketa lapak', action: 'Mediasi Polsek', remarks: 'Selesai' }
+    ]
+  },
   { district: 'Lombok Barat', status: 'Resolved', cases: 1, lastAction: 'Koordinasi aparat' },
-  { district: 'Lombok Tengah', status: 'In Progress', cases: 5, lastAction: 'Tim terpadu turun' },
+  { 
+    district: 'Lombok Tengah', 
+    status: 'In Progress', 
+    cases: 5, 
+    lastAction: 'Tim terpadu turun',
+    details: [
+      { location: 'Kawasan Mandalika', time: '11 Feb 2024', description: 'Pemblokiran jalan', action: 'Dialog persuasif', remarks: 'Jalan dibuka' },
+      { location: 'Desa Rembitan', time: '18 Feb 2024', description: 'Sengketa waris', action: 'Pendampingan hukum', remarks: 'Berjalan' }
+    ]
+  },
   { district: 'Lombok Timur', status: 'In Progress', cases: 4, lastAction: 'Dialog komunitas' },
   { district: 'Lombok Utara', status: 'Resolved', cases: 0, lastAction: 'Pemantauan rutin' },
   { district: 'Sumbawa Barat', status: 'Resolved', cases: 1, lastAction: 'Sosialisasi' },

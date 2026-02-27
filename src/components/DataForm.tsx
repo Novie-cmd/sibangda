@@ -28,10 +28,40 @@ export const DataForm: React.FC<DataFormProps> = ({
   const districts = ['Mataram', 'Lombok Barat', 'Lombok Tengah', 'Lombok Timur', 'Lombok Utara', 'Sumbawa Barat', 'Sumbawa', 'Dompu', 'Bima', 'Kota Bima'];
 
   // Forms State
-  const [conflictForm, setConflictForm] = useState<ConflictData>({ district: 'Mataram', level: 'Low', incidents: 0, description: '' });
-  const [ormasForm, setOrmasForm] = useState<Partial<OrmasData>>({ name: '', category: 'Sosial', district: 'Mataram', status: 'Active', memberCount: 0 });
-  const [wasnasForm, setWasnasForm] = useState<ForeignerData>({ district: 'Mataram', count: 0, institutions: 0 });
-  const [handlingForm, setHandlingForm] = useState<ConflictHandlingData>({ district: 'Mataram', status: 'Pending', cases: 0, lastAction: '' });
+  const [conflictForm, setConflictForm] = useState<ConflictData>({ 
+    district: 'Mataram', 
+    level: 'Low', 
+    incidents: 0, 
+    description: '',
+    locationDetail: '',
+    incidentTime: '',
+    participantsCount: 0
+  });
+  const [ormasForm, setOrmasForm] = useState<Partial<OrmasData>>({ 
+    name: '', 
+    category: 'Sosial', 
+    district: 'Mataram', 
+    status: 'Active', 
+    memberCount: 0,
+    leaderName: '',
+    address: ''
+  });
+  const [wasnasForm, setWasnasForm] = useState<ForeignerData>({ 
+    district: 'Mataram', 
+    count: 0, 
+    institutions: 0,
+    locationDetail: '',
+    activityDescription: ''
+  });
+  const [handlingForm, setHandlingForm] = useState<ConflictHandlingData>({ 
+    district: 'Mataram', 
+    status: 'Pending', 
+    cases: 0, 
+    lastAction: '',
+    locationDetail: '',
+    incidentTime: '',
+    participantsCount: 0
+  });
 
   const handleSubmit = (type: string, e: React.FormEvent) => {
     e.preventDefault();
@@ -74,12 +104,20 @@ export const DataForm: React.FC<DataFormProps> = ({
         <div className="p-8">
           {activeTab === 'conflict' && (
             <form onSubmit={(e) => handleSubmit('conflict', e)} className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah (Kab/Kota)</label>
                   <select value={conflictForm.district} onChange={(e) => setConflictForm({...conflictForm, district: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
                     {districts.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi Detail (Desa/Kel/Kec)</label>
+                  <input type="text" value={conflictForm.locationDetail} onChange={(e) => setConflictForm({...conflictForm, locationDetail: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Contoh: Desa Kuta, Kec. Pujut" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Waktu Kejadian</label>
+                  <input type="text" value={conflictForm.incidentTime} onChange={(e) => setConflictForm({...conflictForm, incidentTime: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Contoh: 20 Feb 2024, 10:00 WITA" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tingkat Potensi</label>
@@ -87,13 +125,17 @@ export const DataForm: React.FC<DataFormProps> = ({
                     <option value="Low">Rendah</option><option value="Medium">Sedang</option><option value="High">Tinggi</option>
                   </select>
                 </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jumlah Insiden</label>
+                  <input type="number" value={conflictForm.incidents} onChange={(e) => setConflictForm({...conflictForm, incidents: parseInt(e.target.value)})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jumlah Orang Aksi (Jika ada)</label>
+                  <input type="number" value={conflictForm.participantsCount} onChange={(e) => setConflictForm({...conflictForm, participantsCount: parseInt(e.target.value)})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jumlah Insiden</label>
-                <input type="number" value={conflictForm.incidents} onChange={(e) => setConflictForm({...conflictForm, incidents: parseInt(e.target.value)})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Keterangan Situasi</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uraian Kejadian / Keterangan Situasi</label>
                 <textarea value={conflictForm.description} onChange={(e) => setConflictForm({...conflictForm, description: e.target.value})} rows={3} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Detail kondisi lapangan..." />
               </div>
               <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center space-x-2">
@@ -104,12 +146,20 @@ export const DataForm: React.FC<DataFormProps> = ({
 
           {activeTab === 'handling' && (
             <form onSubmit={(e) => handleSubmit('handling', e)} className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah (Kab/Kota)</label>
                   <select value={handlingForm.district} onChange={(e) => setHandlingForm({...handlingForm, district: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
                     {districts.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi Detail (Desa/Kel/Kec)</label>
+                  <input type="text" value={handlingForm.locationDetail} onChange={(e) => setHandlingForm({...handlingForm, locationDetail: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Contoh: Desa Kuta, Kec. Pujut" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Waktu Kejadian</label>
+                  <input type="text" value={handlingForm.incidentTime} onChange={(e) => setHandlingForm({...handlingForm, incidentTime: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Contoh: 20 Feb 2024" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status Penanganan</label>
@@ -117,14 +167,18 @@ export const DataForm: React.FC<DataFormProps> = ({
                     <option value="Resolved">Selesai</option><option value="In Progress">Dalam Proses</option><option value="Pending">Menunggu</option>
                   </select>
                 </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jumlah Kasus Ditangani</label>
+                  <input type="number" value={handlingForm.cases} onChange={(e) => setHandlingForm({...handlingForm, cases: parseInt(e.target.value)})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jumlah Orang Aksi</label>
+                  <input type="number" value={handlingForm.participantsCount} onChange={(e) => setHandlingForm({...handlingForm, participantsCount: parseInt(e.target.value)})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jumlah Kasus Ditangani</label>
-                <input type="number" value={handlingForm.cases} onChange={(e) => setHandlingForm({...handlingForm, cases: parseInt(e.target.value)})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tindakan Terakhir</label>
-                <input type="text" value={handlingForm.lastAction} onChange={(e) => setHandlingForm({...handlingForm, lastAction: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Contoh: Mediasi warga..." />
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tindakan Terakhir / Langkah Penanganan</label>
+                <input type="text" value={handlingForm.lastAction} onChange={(e) => setHandlingForm({...handlingForm, lastAction: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Contoh: Mediasi warga, koordinasi aparat..." />
               </div>
               <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center space-x-2">
                 <Save size={20} /><span>Update Status Penanganan</span>
@@ -134,13 +188,17 @@ export const DataForm: React.FC<DataFormProps> = ({
 
           {activeTab === 'wasnas' && (
             <form onSubmit={(e) => handleSubmit('wasnas', e)} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah Pemantauan</label>
-                <select value={wasnasForm.district} onChange={(e) => setWasnasForm({...wasnasForm, district: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                  {districts.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah Pemantauan</label>
+                  <select value={wasnasForm.district} onChange={(e) => setWasnasForm({...wasnasForm, district: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi Detail (Kec/Desa)</label>
+                  <input type="text" value={wasnasForm.locationDetail} onChange={(e) => setWasnasForm({...wasnasForm, locationDetail: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Lokasi spesifik..." />
+                </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jumlah Orang Asing</label>
                   <input type="number" value={wasnasForm.count} onChange={(e) => setWasnasForm({...wasnasForm, count: parseInt(e.target.value)})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
@@ -150,6 +208,10 @@ export const DataForm: React.FC<DataFormProps> = ({
                   <input type="number" value={wasnasForm.institutions} onChange={(e) => setWasnasForm({...wasnasForm, institutions: parseInt(e.target.value)})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
                 </div>
               </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uraian Aktivitas / Keterangan</label>
+                <textarea value={wasnasForm.activityDescription} onChange={(e) => setWasnasForm({...wasnasForm, activityDescription: e.target.value})} rows={2} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Tujuan kunjungan, kegiatan, dll..." />
+              </div>
               <button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-purple-200 transition-all flex items-center justify-center space-x-2">
                 <Save size={20} /><span>Update Data Wasnas</span>
               </button>
@@ -158,11 +220,15 @@ export const DataForm: React.FC<DataFormProps> = ({
 
           {activeTab === 'ormas' && (
             <form onSubmit={(e) => handleSubmit('ormas', e)} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Organisasi</label>
-                <input type="text" required value={ormasForm.name} onChange={(e) => setOrmasForm({...ormasForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Nama lengkap ormas..." />
-              </div>
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Organisasi</label>
+                  <input type="text" required value={ormasForm.name} onChange={(e) => setOrmasForm({...ormasForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Nama lengkap ormas..." />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Ketua / Pimpinan</label>
+                  <input type="text" value={ormasForm.leaderName} onChange={(e) => setOrmasForm({...ormasForm, leaderName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Nama ketua..." />
+                </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kategori</label>
                   <select value={ormasForm.category} onChange={(e) => setOrmasForm({...ormasForm, category: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
@@ -170,11 +236,19 @@ export const DataForm: React.FC<DataFormProps> = ({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah (Kab/Kota)</label>
                   <select value={ormasForm.district} onChange={(e) => setOrmasForm({...ormasForm, district: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
                     {districts.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jumlah Anggota</label>
+                  <input type="number" value={ormasForm.memberCount} onChange={(e) => setOrmasForm({...ormasForm, memberCount: parseInt(e.target.value)})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat Sekretariat</label>
+                <textarea value={ormasForm.address} onChange={(e) => setOrmasForm({...ormasForm, address: e.target.value})} rows={2} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Alamat lengkap..." />
               </div>
               <button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center space-x-2">
                 <Save size={20} /><span>Daftarkan Ormas Baru</span>
@@ -203,13 +277,15 @@ export const DataForm: React.FC<DataFormProps> = ({
                 <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah</th>
                 {activeTab === 'conflict' && (
                   <>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi Detail</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Waktu</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tingkat</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Insiden</th>
-                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Keterangan</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aksi (Orang)</th>
                   </>
                 )}
                 {activeTab === 'handling' && (
                   <>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi Detail</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kasus</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tindakan</th>
@@ -217,6 +293,7 @@ export const DataForm: React.FC<DataFormProps> = ({
                 )}
                 {activeTab === 'wasnas' && (
                   <>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Orang Asing</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lembaga</th>
                   </>
@@ -224,6 +301,7 @@ export const DataForm: React.FC<DataFormProps> = ({
                 {activeTab === 'ormas' && (
                   <>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ketua</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kategori</th>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Anggota</th>
                   </>
@@ -234,6 +312,8 @@ export const DataForm: React.FC<DataFormProps> = ({
               {activeTab === 'conflict' && conflictData.map((item, idx) => (
                 <tr key={idx} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-slate-700">{item.district}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.locationDetail || '-'}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.incidentTime || '-'}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase ${
                       item.level === 'High' ? 'bg-red-500' : item.level === 'Medium' ? 'bg-amber-500' : 'bg-emerald-500'
@@ -241,13 +321,13 @@ export const DataForm: React.FC<DataFormProps> = ({
                       {item.level}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{item.incidents}</td>
-                  <td className="px-6 py-4 text-sm text-slate-500">{item.description}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.participantsCount || 0}</td>
                 </tr>
               ))}
               {activeTab === 'handling' && handlingData.map((item, idx) => (
                 <tr key={idx} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-slate-700">{item.district}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.locationDetail || '-'}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase ${
                       item.status === 'Resolved' ? 'bg-emerald-500' : item.status === 'In Progress' ? 'bg-amber-500' : 'bg-slate-400'
@@ -262,6 +342,7 @@ export const DataForm: React.FC<DataFormProps> = ({
               {activeTab === 'wasnas' && wasnasData.map((item, idx) => (
                 <tr key={idx} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-slate-700">{item.district}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.locationDetail || '-'}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.count}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.institutions}</td>
                 </tr>
@@ -270,6 +351,7 @@ export const DataForm: React.FC<DataFormProps> = ({
                 <tr key={idx} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-medium text-slate-700">{item.district}</td>
                   <td className="px-6 py-4 text-sm text-slate-700 font-bold">{item.name}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.leaderName || '-'}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.category}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.memberCount}</td>
                 </tr>

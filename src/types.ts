@@ -1,8 +1,27 @@
+export interface IncidentDetail {
+  location: string;
+  time: string;
+  description: string;
+  remarks: string;
+}
+
+export interface CaseDetail {
+  location: string;
+  time: string;
+  description: string;
+  action: string;
+  remarks: string;
+}
+
 export interface ConflictData {
   district: string;
   level: 'Low' | 'Medium' | 'High';
   incidents: number;
   description: string;
+  locationDetail?: string;
+  incidentTime?: string;
+  participantsCount?: number;
+  details?: IncidentDetail[];
 }
 
 export interface ConflictHandlingData {
@@ -10,12 +29,18 @@ export interface ConflictHandlingData {
   status: 'Resolved' | 'In Progress' | 'Pending';
   cases: number;
   lastAction: string;
+  locationDetail?: string;
+  incidentTime?: string;
+  participantsCount?: number;
+  details?: CaseDetail[];
 }
 
 export interface ForeignerData {
   district: string;
   count: number;
   institutions: number;
+  locationDetail?: string;
+  activityDescription?: string;
 }
 
 export interface OrmasData {
@@ -25,6 +50,8 @@ export interface OrmasData {
   district: string;
   status: 'Active' | 'Inactive';
   memberCount: number;
+  leaderName?: string;
+  address?: string;
 }
 
 export interface DashboardStats {

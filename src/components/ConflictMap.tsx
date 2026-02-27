@@ -30,7 +30,7 @@ export const ConflictMap: React.FC<ConflictMapProps> = ({ data }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           {data.map((item) => (
             <div 
               key={item.district}
@@ -53,15 +53,62 @@ export const ConflictMap: React.FC<ConflictMapProps> = ({ data }) => {
           ))}
         </div>
 
-        {/* Visual Map Placeholder */}
-        <div className="mt-8 h-64 bg-slate-100 rounded-xl flex items-center justify-center relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-          <div className="text-slate-400 font-medium flex flex-col items-center">
-            <svg className="w-24 h-24 mb-2 opacity-20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        {/* Visual Map Placeholder - Interactive SVG */}
+        <div className="mt-8 p-8 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col items-center justify-center min-h-[400px]">
+          <div className="w-full max-w-4xl">
+            <svg viewBox="0 0 1000 400" className="w-full h-auto drop-shadow-2xl">
+              {/* Simplified NTB Map Shapes */}
+              {/* Lombok Island */}
+              <g transform="translate(50, 50)">
+                <path 
+                  d="M100,50 L250,30 L320,150 L280,300 L120,320 L50,200 Z" 
+                  fill={selectedDistrict?.district.includes('Lombok') || selectedDistrict?.district === 'Mataram' ? '#10b981' : '#e2e8f0'} 
+                  className="transition-all duration-500 cursor-pointer hover:fill-emerald-400"
+                  stroke="#fff" strokeWidth="4"
+                />
+                <text x="180" y="180" className="text-xs font-bold fill-slate-600 pointer-events-none">LOMBOK</text>
+              </g>
+              {/* Sumbawa Island */}
+              <g transform="translate(400, 50)">
+                <path 
+                  d="M50,100 L200,50 L350,80 L550,40 L580,150 L500,280 L300,320 L100,250 Z" 
+                  fill={selectedDistrict?.district.includes('Sumbawa') || selectedDistrict?.district.includes('Bima') || selectedDistrict?.district === 'Dompu' ? '#10b981' : '#e2e8f0'} 
+                  className="transition-all duration-500 cursor-pointer hover:fill-emerald-400"
+                  stroke="#fff" strokeWidth="4"
+                />
+                <text x="300" y="180" className="text-xs font-bold fill-slate-600 pointer-events-none">SUMBAWA</text>
+              </g>
+              
+              {/* District Dots */}
+              {data.map((item, idx) => {
+                // Approximate positions
+                const positions: Record<string, {x: number, y: number}> = {
+                  'Mataram': {x: 180, y: 180},
+                  'Lombok Barat': {x: 160, y: 220},
+                  'Lombok Tengah': {x: 220, y: 230},
+                  'Lombok Timur': {x: 280, y: 200},
+                  'Lombok Utara': {x: 220, y: 100},
+                  'Sumbawa Barat': {x: 480, y: 200},
+                  'Sumbawa': {x: 600, y: 180},
+                  'Dompu': {x: 750, y: 200},
+                  'Bima': {x: 880, y: 180},
+                  'Kota Bima': {x: 900, y: 150},
+                };
+                const pos = positions[item.district] || {x: 0, y: 0};
+                return (
+                  <circle 
+                    key={idx}
+                    cx={pos.x} cy={pos.y} r={selectedDistrict?.district === item.district ? 12 : 8}
+                    className={`${getLevelColor(item.level)} cursor-pointer transition-all duration-300 hover:r-14`}
+                    onClick={() => setSelectedDistrict(item)}
+                  >
+                    <title>{item.district}: {item.incidents} Insiden</title>
+                  </circle>
+                );
+              })}
             </svg>
-            Visualisasi Peta NTB (Interactive SVG)
           </div>
+          <p className="mt-6 text-slate-400 text-xs font-medium uppercase tracking-widest">Klik wilayah atau titik untuk detail kejadian</p>
         </div>
       </div>
 
@@ -86,7 +133,7 @@ export const ConflictMap: React.FC<ConflictMapProps> = ({ data }) => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tingkat Ancaman</p>
               <div className="flex items-center space-x-2">
@@ -101,17 +148,53 @@ export const ConflictMap: React.FC<ConflictMapProps> = ({ data }) => {
             </div>
 
             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Status Verifikasi</p>
-              <div className="flex items-center space-x-2 text-emerald-600">
-                <Info size={16} />
-                <span className="text-sm font-bold">Terverifikasi Lapangan</span>
-              </div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Lokasi Terakhir</p>
+              <p className="text-sm font-bold text-slate-800 truncate">{selectedDistrict.locationDetail || 'N/A'}</p>
+              <p className="text-[10px] text-slate-400">{selectedDistrict.incidentTime || 'Waktu tidak tercatat'}</p>
+            </div>
+
+            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Massa Terlibat</p>
+              <p className="text-xl font-bold text-slate-900">{selectedDistrict.participantsCount || 0} <span className="text-[10px] font-normal text-slate-400 uppercase ml-1">Orang</span></p>
             </div>
           </div>
 
-          <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Analisis Situasi</p>
-            <p className="text-slate-700 leading-relaxed">{selectedDistrict.description}</p>
+          <div className="space-y-6">
+            <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Analisis Situasi</p>
+              <p className="text-slate-700 leading-relaxed">{selectedDistrict.description}</p>
+            </div>
+
+            {/* Detailed Incident List */}
+            {selectedDistrict.details && selectedDistrict.details.length > 0 && (
+              <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                <div className="px-6 py-4 bg-slate-50 border-b border-slate-100">
+                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest">Daftar Detail Kejadian</h4>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-slate-50/50">
+                        <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi</th>
+                        <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Waktu</th>
+                        <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uraian Kejadian</th>
+                        <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Keterangan</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {selectedDistrict.details.map((detail, idx) => (
+                        <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-6 py-4 text-sm font-bold text-slate-700">{detail.location}</td>
+                          <td className="px-6 py-4 text-sm text-slate-600">{detail.time}</td>
+                          <td className="px-6 py-4 text-sm text-slate-600">{detail.description}</td>
+                          <td className="px-6 py-4 text-sm text-slate-500 italic">{detail.remarks}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mt-8 flex justify-end space-x-4">

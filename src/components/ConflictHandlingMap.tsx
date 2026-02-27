@@ -113,7 +113,7 @@ export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data }
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div className="space-y-6">
               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Status Saat Ini</p>
@@ -141,22 +141,59 @@ export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data }
                 <CheckCircle2 size={120} />
               </div>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Ringkasan Kasus</p>
-              <div className="space-y-6 relative z-10">
-                <div className="flex justify-between items-end border-b border-slate-800 pb-4">
-                  <span className="text-slate-400 text-sm">Total Kasus</span>
-                  <span className="text-4xl font-black">{selectedDistrict.cases}</span>
+              <div className="space-y-4 relative z-10">
+                <div className="flex justify-between items-end border-b border-slate-800 pb-2">
+                  <span className="text-slate-400 text-xs">Total Kasus</span>
+                  <span className="text-2xl font-black">{selectedDistrict.cases}</span>
                 </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-400">Tingkat Keberhasilan</span>
-                  <span className="text-emerald-400 font-bold">85%</span>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400">Massa Terlibat</span>
+                  <span className="text-white font-bold">{selectedDistrict.participantsCount || 0} Orang</span>
                 </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-slate-400">Prioritas Penanganan</span>
-                  <span className="text-amber-400 font-bold">Medium</span>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400">Lokasi Terakhir</span>
+                  <span className="text-white font-bold truncate max-w-[150px]">{selectedDistrict.locationDetail || '-'}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-slate-400">Waktu Kejadian</span>
+                  <span className="text-white font-bold">{selectedDistrict.incidentTime || '-'}</span>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Detailed Case List */}
+          {selectedDistrict.details && selectedDistrict.details.length > 0 && (
+            <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+              <div className="px-6 py-4 bg-slate-50 border-b border-slate-100">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest">Daftar Detail Kasus & Penanganan</h4>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-slate-50/50">
+                      <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi</th>
+                      <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Waktu</th>
+                      <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uraian Kejadian</th>
+                      <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tindakan</th>
+                      <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Keterangan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {selectedDistrict.details.map((detail, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-6 py-4 text-sm font-bold text-slate-700">{detail.location}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{detail.time}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{detail.description}</td>
+                        <td className="px-6 py-4 text-sm text-blue-600 font-medium">{detail.action}</td>
+                        <td className="px-6 py-4 text-sm text-slate-500 italic">{detail.remarks}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           <div className="mt-8 flex justify-end space-x-4">
             <button className="px-6 py-3 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">

@@ -31,6 +31,7 @@ export const OrmasTable: React.FC<OrmasTableProps> = ({ data }) => {
           <thead>
             <tr className="bg-slate-50">
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Organisasi</th>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Ketua</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Kategori</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Wilayah</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Anggota</th>
@@ -42,8 +43,9 @@ export const OrmasTable: React.FC<OrmasTableProps> = ({ data }) => {
               <tr key={ormas.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-6 py-4">
                   <div className="font-semibold text-slate-800">{ormas.name}</div>
-                  <div className="text-[10px] text-slate-400">ID: {ormas.id}</div>
+                  <div className="text-[10px] text-slate-400">Alamat: {ormas.address || '-'}</div>
                 </td>
+                <td className="px-6 py-4 text-sm text-slate-700 font-medium">{ormas.leaderName || '-'}</td>
                 <td className="px-6 py-4">
                   <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium">
                     {ormas.category}
