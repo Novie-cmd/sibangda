@@ -45,6 +45,10 @@ export default function App() {
           onAddOrmas={handleAddOrmas}
           onUpdateWasnas={handleUpdateWasnas}
           onUpdateHandling={handleUpdateHandling}
+          conflictData={conflictData}
+          ormasData={ormasData}
+          wasnasData={foreignerData}
+          handlingData={handlingData}
         />
       );
       default: return <Dashboard conflictData={conflictData} ormasData={ormasData} foreignerData={foreignerData} />;
