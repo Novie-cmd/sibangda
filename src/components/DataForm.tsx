@@ -47,7 +47,8 @@ export const DataForm: React.FC<DataFormProps> = ({
     locationDetail: '',
     incidentTime: '',
     participantsCount: 0,
-    imageUrl: ''
+    imageUrl: '',
+    mediaUrls: []
   };
 
   const initialOrmas: Partial<OrmasData> = { 
@@ -79,7 +80,8 @@ export const DataForm: React.FC<DataFormProps> = ({
     locationDetail: '',
     incidentTime: '',
     participantsCount: 0,
-    imageUrl: ''
+    imageUrl: '',
+    mediaUrls: []
   };
 
   // Forms State
@@ -127,15 +129,49 @@ export const DataForm: React.FC<DataFormProps> = ({
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        if (type === 'conflict') setConflictForm({ ...conflictForm, imageUrl: base64String });
-        if (type === 'handling') setHandlingForm({ ...handlingForm, imageUrl: base64String });
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const newMediaUrls: string[] = [];
+      let loadedCount = 0;
+
+      Array.from(files).forEach((file: File) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newMediaUrls.push(reader.result as string);
+          loadedCount++;
+          
+          if (loadedCount === files.length) {
+            if (type === 'conflict') {
+              setConflictForm(prev => ({ 
+                ...prev, 
+                mediaUrls: [...(prev.mediaUrls || []), ...newMediaUrls] 
+              }));
+            }
+            if (type === 'handling') {
+              setHandlingForm(prev => ({ 
+                ...prev, 
+                mediaUrls: [...(prev.mediaUrls || []), ...newMediaUrls] 
+              }));
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removeMedia = (type: string, index: number) => {
+    if (type === 'conflict') {
+      setConflictForm(prev => ({
+        ...prev,
+        mediaUrls: prev.mediaUrls?.filter((_, i) => i !== index)
+      }));
+    }
+    if (type === 'handling') {
+      setHandlingForm(prev => ({
+        ...prev,
+        mediaUrls: prev.mediaUrls?.filter((_, i) => i !== index)
+      }));
     }
   };
 
@@ -226,33 +262,27 @@ export const DataForm: React.FC<DataFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lampiran Foto Kejadian</label>
-                <div className="flex items-center space-x-4">
-                  <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all overflow-hidden relative group">
-                    {conflictForm.imageUrl ? (
-                      <>
-                        <img src={conflictForm.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                          <Upload className="text-white" size={20} />
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <ImageIcon className="text-slate-300 mb-2" size={24} />
-                        <p className="text-[8px] font-bold text-slate-400 uppercase">Upload Foto</p>
-                      </div>
-                    )}
-                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'conflict')} />
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lampiran Foto/Video Kejadian (Bisa lebih dari 1)</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {conflictForm.mediaUrls?.map((url, idx) => (
+                    <div key={idx} className="relative group aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                      <img src={url} alt={`Media ${idx}`} className="w-full h-full object-cover" />
+                      <button 
+                        type="button"
+                        onClick={() => removeMedia('conflict', idx)}
+                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all overflow-hidden relative group">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <ImageIcon className="text-slate-300 mb-2" size={24} />
+                      <p className="text-[8px] font-bold text-slate-400 uppercase">Tambah Media</p>
+                    </div>
+                    <input type="file" className="hidden" accept="image/*,video/*" multiple onChange={(e) => handleImageUpload(e, 'conflict')} />
                   </label>
-                  {conflictForm.imageUrl && (
-                    <button 
-                      type="button" 
-                      onClick={() => setConflictForm({ ...conflictForm, imageUrl: '' })}
-                      className="text-[10px] font-bold text-red-500 uppercase tracking-widest hover:underline"
-                    >
-                      Hapus Foto
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -307,33 +337,27 @@ export const DataForm: React.FC<DataFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dokumentasi Penanganan</label>
-                <div className="flex items-center space-x-4">
-                  <label className="flex flex-col items-center justify-center w-32 h-32 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all overflow-hidden relative group">
-                    {handlingForm.imageUrl ? (
-                      <>
-                        <img src={handlingForm.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                          <Upload className="text-white" size={20} />
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <ImageIcon className="text-slate-300 mb-2" size={24} />
-                        <p className="text-[8px] font-bold text-slate-400 uppercase">Upload Foto</p>
-                      </div>
-                    )}
-                    <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'handling')} />
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dokumentasi Penanganan (Bisa lebih dari 1)</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {handlingForm.mediaUrls?.map((url, idx) => (
+                    <div key={idx} className="relative group aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                      <img src={url} alt={`Media ${idx}`} className="w-full h-full object-cover" />
+                      <button 
+                        type="button"
+                        onClick={() => removeMedia('handling', idx)}
+                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 transition-all overflow-hidden relative group">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <ImageIcon className="text-slate-300 mb-2" size={24} />
+                      <p className="text-[8px] font-bold text-slate-400 uppercase">Tambah Media</p>
+                    </div>
+                    <input type="file" className="hidden" accept="image/*,video/*" multiple onChange={(e) => handleImageUpload(e, 'handling')} />
                   </label>
-                  {handlingForm.imageUrl && (
-                    <button 
-                      type="button" 
-                      onClick={() => setHandlingForm({ ...handlingForm, imageUrl: '' })}
-                      className="text-[10px] font-bold text-red-500 uppercase tracking-widest hover:underline"
-                    >
-                      Hapus Foto
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -498,13 +522,22 @@ export const DataForm: React.FC<DataFormProps> = ({
               {activeTab === 'conflict' && conflictData.map((item, idx) => (
                 <tr key={item.id || idx} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4">
-                    {item.imageUrl ? (
-                      <img src={item.imageUrl} alt="Incident" className="w-10 h-10 rounded-lg object-cover border border-slate-200" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300">
-                        <ImageIcon size={16} />
-                      </div>
-                    )}
+                    <div className="flex -space-x-2">
+                      {item.mediaUrls && item.mediaUrls.length > 0 ? (
+                        item.mediaUrls.slice(0, 3).map((url, i) => (
+                          <img key={i} src={url} alt="Incident" className="w-8 h-8 rounded-lg object-cover border-2 border-white shadow-sm" />
+                        ))
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300 border-2 border-white shadow-sm">
+                          <ImageIcon size={14} />
+                        </div>
+                      )}
+                      {item.mediaUrls && item.mediaUrls.length > 3 && (
+                        <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-[10px] font-bold text-white border-2 border-white shadow-sm">
+                          +{item.mediaUrls.length - 3}
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-slate-700">{item.district}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.locationDetail || '-'}</td>
@@ -532,13 +565,22 @@ export const DataForm: React.FC<DataFormProps> = ({
               {activeTab === 'handling' && handlingData.map((item, idx) => (
                 <tr key={item.id || idx} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4">
-                    {item.imageUrl ? (
-                      <img src={item.imageUrl} alt="Handling" className="w-10 h-10 rounded-lg object-cover border border-slate-200" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300">
-                        <ImageIcon size={16} />
-                      </div>
-                    )}
+                    <div className="flex -space-x-2">
+                      {item.mediaUrls && item.mediaUrls.length > 0 ? (
+                        item.mediaUrls.slice(0, 3).map((url, i) => (
+                          <img key={i} src={url} alt="Handling" className="w-8 h-8 rounded-lg object-cover border-2 border-white shadow-sm" />
+                        ))
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-300 border-2 border-white shadow-sm">
+                          <ImageIcon size={14} />
+                        </div>
+                      )}
+                      {item.mediaUrls && item.mediaUrls.length > 3 && (
+                        <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-[10px] font-bold text-white border-2 border-white shadow-sm">
+                          +{item.mediaUrls.length - 3}
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-slate-700">{item.district}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{item.locationDetail || '-'}</td>

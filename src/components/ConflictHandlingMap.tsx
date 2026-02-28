@@ -168,9 +168,18 @@ export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data, 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div className="space-y-6">
-              {selectedDistrict.imageUrl && (
-                <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm h-48">
-                  <img src={selectedDistrict.imageUrl} alt="Handling Documentation" className="w-full h-full object-cover" />
+              {((selectedDistrict.mediaUrls && selectedDistrict.mediaUrls.length > 0) || selectedDistrict.imageUrl) && (
+                <div className="grid grid-cols-2 gap-3">
+                  {selectedDistrict.imageUrl && (
+                    <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm h-48 col-span-2">
+                      <img src={selectedDistrict.imageUrl} alt="Handling Documentation" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  {selectedDistrict.mediaUrls?.map((url, idx) => (
+                    <div key={idx} className={`rounded-2xl overflow-hidden border border-slate-100 shadow-sm h-48 ${selectedDistrict.mediaUrls?.length === 1 ? 'col-span-2' : ''}`}>
+                      <img src={url} alt={`Documentation ${idx}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
                 </div>
               )}
               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">

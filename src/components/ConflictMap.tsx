@@ -208,9 +208,18 @@ export const ConflictMap: React.FC<ConflictMapProps> = ({ data, customMapImage, 
           </div>
 
           <div className="space-y-6">
-            {selectedDistrict.imageUrl && (
-              <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm h-64">
-                <img src={selectedDistrict.imageUrl} alt="Incident" className="w-full h-full object-cover" />
+            {((selectedDistrict.mediaUrls && selectedDistrict.mediaUrls.length > 0) || selectedDistrict.imageUrl) && (
+              <div className="grid grid-cols-2 gap-3">
+                {selectedDistrict.imageUrl && (
+                  <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm h-64 col-span-2">
+                    <img src={selectedDistrict.imageUrl} alt="Incident" className="w-full h-full object-cover" />
+                  </div>
+                )}
+                {selectedDistrict.mediaUrls?.map((url, idx) => (
+                  <div key={idx} className={`rounded-2xl overflow-hidden border border-slate-100 shadow-sm h-48 ${selectedDistrict.mediaUrls?.length === 1 ? 'col-span-2' : ''}`}>
+                    <img src={url} alt={`Incident ${idx}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
               </div>
             )}
             

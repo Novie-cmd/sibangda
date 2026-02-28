@@ -23,6 +23,7 @@ export interface ConflictData {
   incidentTime?: string;
   participantsCount?: number;
   imageUrl?: string;
+  mediaUrls?: string[];
   details?: IncidentDetail[];
 }
 
@@ -36,6 +37,7 @@ export interface ConflictHandlingData {
   incidentTime?: string;
   participantsCount?: number;
   imageUrl?: string;
+  mediaUrls?: string[];
   details?: CaseDetail[];
 }
 
