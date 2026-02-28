@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { ConflictMap } from './components/ConflictMap';
@@ -13,12 +13,64 @@ import { Bell, User, Search } from 'lucide-react';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>('dashboard');
-  const [conflictData, setConflictData] = useState<ConflictData[]>(INITIAL_CONFLICT_DATA);
-  const [ormasData, setOrmasData] = useState<OrmasData[]>(INITIAL_ORMAS_DATA);
-  const [handlingData, setHandlingData] = useState<ConflictHandlingData[]>(INITIAL_CONFLICT_HANDLING_DATA);
-  const [foreignerData, setForeignerData] = useState<ForeignerData[]>(INITIAL_FOREIGNER_DATA);
-  const [customMapImage, setCustomMapImage] = useState<string | null>(null);
-  const [customHandlingMapImage, setCustomHandlingMapImage] = useState<string | null>(null);
+  
+  // Initialize state from localStorage if available
+  const [conflictData, setConflictData] = useState<ConflictData[]>(() => {
+    const saved = localStorage.getItem('sibangda_conflict_data');
+    return saved ? JSON.parse(saved) : INITIAL_CONFLICT_DATA;
+  });
+  
+  const [ormasData, setOrmasData] = useState<OrmasData[]>(() => {
+    const saved = localStorage.getItem('sibangda_ormas_data');
+    return saved ? JSON.parse(saved) : INITIAL_ORMAS_DATA;
+  });
+  
+  const [handlingData, setHandlingData] = useState<ConflictHandlingData[]>(() => {
+    const saved = localStorage.getItem('sibangda_handling_data');
+    return saved ? JSON.parse(saved) : INITIAL_CONFLICT_HANDLING_DATA;
+  });
+  
+  const [foreignerData, setForeignerData] = useState<ForeignerData[]>(() => {
+    const saved = localStorage.getItem('sibangda_foreigner_data');
+    return saved ? JSON.parse(saved) : INITIAL_FOREIGNER_DATA;
+  });
+  
+  const [customMapImage, setCustomMapImage] = useState<string | null>(() => {
+    return localStorage.getItem('sibangda_custom_map_image');
+  });
+  
+  const [customHandlingMapImage, setCustomHandlingMapImage] = useState<string | null>(() => {
+    return localStorage.getItem('sibangda_custom_handling_map_image');
+  });
+
+  // Persist state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('sibangda_conflict_data', JSON.stringify(conflictData));
+  }, [conflictData]);
+
+  useEffect(() => {
+    localStorage.setItem('sibangda_ormas_data', JSON.stringify(ormasData));
+  }, [ormasData]);
+
+  useEffect(() => {
+    localStorage.setItem('sibangda_handling_data', JSON.stringify(handlingData));
+  }, [handlingData]);
+
+  useEffect(() => {
+    localStorage.setItem('sibangda_foreigner_data', JSON.stringify(foreignerData));
+  }, [foreignerData]);
+
+  useEffect(() => {
+    if (customMapImage) {
+      localStorage.setItem('sibangda_custom_map_image', customMapImage);
+    }
+  }, [customMapImage]);
+
+  useEffect(() => {
+    if (customHandlingMapImage) {
+      localStorage.setItem('sibangda_custom_handling_map_image', customHandlingMapImage);
+    }
+  }, [customHandlingMapImage]);
 
   const handleUpdateConflict = (newData: ConflictData) => {
     setConflictData(prev => {
