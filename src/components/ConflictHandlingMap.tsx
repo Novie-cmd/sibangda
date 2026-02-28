@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ConflictHandlingData } from '../types';
-import { CheckCircle2, Clock, AlertCircle, X, FileText, History, Upload } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, X, FileText, History, Upload, MapPin, Users, Calendar } from 'lucide-react';
 
 interface ConflictHandlingMapProps {
   data: ConflictHandlingData[];
@@ -9,7 +9,20 @@ interface ConflictHandlingMapProps {
 }
 
 export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data, customMapImage, onMapImageUpload }) => {
-  const [selectedDistrict, setSelectedDistrict] = useState<ConflictHandlingData | null>(null);
+  const [selectedDistrictName, setSelectedDistrictName] = useState<string | null>(null);
+
+  const groupedData = useMemo(() => {
+    const groups: Record<string, ConflictHandlingData[]> = {};
+    data.forEach(item => {
+      if (!groups[item.district]) {
+        groups[item.district] = [];
+      }
+      groups[item.district].push(item);
+    });
+    return groups;
+  }, [data]);
+
+  const selectedDistrictData = selectedDistrictName ? groupedData[selectedDistrictName] : null;
 
   const handleMapUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -75,7 +88,7 @@ export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data, 
             
             {/* Interactive Overlay Layer */}
             <svg viewBox="0 0 1280 512" className="absolute inset-0 w-full h-full">
-              {data.map((item, idx) => {
+              {Object.entries(groupedData).map(([district, items], idx) => {
                 const positions: Record<string, {x: number, y: number}> = {
                   'Mataram': {x: 135, y: 275},
                   'Lombok Barat': {x: 125, y: 315},
@@ -88,16 +101,24 @@ export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data, 
                   'Bima': {x: 1010, y: 305},
                   'Kota Bima': {x: 1000, y: 275},
                 };
-                const pos = positions[item.district] || {x: 0, y: 0};
-                const isSelected = selectedDistrict?.district === item.district;
+                const pos = positions[district] || {x: 0, y: 0};
+                const isSelected = selectedDistrictName === district;
+                
+                // Determine overall status for the dot
+                const statuses = items.map(i => i.status);
+                let overallStatus: 'Pending' | 'In Progress' | 'Resolved' = 'Resolved';
+                if (statuses.includes('Pending')) overallStatus = 'Pending';
+                else if (statuses.includes('In Progress')) overallStatus = 'In Progress';
+
+                const totalCases = items.reduce((acc, curr) => acc + curr.cases, 0);
                 
                 return (
-                  <g key={idx} onClick={() => setSelectedDistrict(item)} className="cursor-pointer group">
+                  <g key={idx} onClick={() => setSelectedDistrictName(district)} className="cursor-pointer group">
                     {/* Main Dot */}
                     <circle 
                       cx={pos.x} cy={pos.y} 
                       r={isSelected ? 14 : 10}
-                      className={`${getStatusColor(item.status)} stroke-white stroke-[3px] transition-all duration-300 group-hover:r-16 shadow-xl`}
+                      className={`${getStatusColor(overallStatus)} stroke-white stroke-[3px] transition-all duration-300 group-hover:r-16 shadow-xl`}
                     />
                     
                     {/* Label */}
@@ -112,13 +133,13 @@ export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data, 
                         x={pos.x + 25} y={pos.y - 18} 
                         className="fill-white text-[12px] font-bold pointer-events-none"
                       >
-                        {item.district}
+                        {district}
                       </text>
                       <text 
                         x={pos.x + 25} y={pos.y - 4} 
                         className="fill-slate-300 text-[9px] font-medium pointer-events-none uppercase tracking-widest"
                       >
-                        {item.cases} Kasus
+                        {totalCases} Kasus
                       </text>
                     </g>
                   </g>
@@ -146,128 +167,140 @@ export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data, 
       </div>
 
       {/* Detail Panel */}
-      {selectedDistrict && (
+      {selectedDistrictName && selectedDistrictData && (
         <div className="bg-white p-8 rounded-3xl shadow-xl border border-blue-100 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="flex justify-between items-start mb-8">
             <div className="flex items-center space-x-4">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${getStatusColor(selectedDistrict.status)}`}>
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg bg-slate-800`}>
                 <FileText size={28} />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-slate-900">Log Penanganan: {selectedDistrict.district}</h3>
-                <p className="text-sm text-slate-500">Rekam jejak penyelesaian konflik sosial</p>
+                <h3 className="text-2xl font-bold text-slate-900">Log Penanganan: {selectedDistrictName}</h3>
+                <p className="text-sm text-slate-500">Menampilkan {selectedDistrictData.length} data penanganan konflik</p>
               </div>
             </div>
             <button 
-              onClick={() => setSelectedDistrict(null)}
+              onClick={() => setSelectedDistrictName(null)}
               className="p-2 hover:bg-slate-100 rounded-full transition-colors"
             >
               <X size={20} className="text-slate-400" />
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div className="space-y-6">
-              {((selectedDistrict.mediaUrls && selectedDistrict.mediaUrls.length > 0) || selectedDistrict.imageUrl) && (
-                <div className="grid grid-cols-2 gap-3">
-                  {selectedDistrict.imageUrl && (
-                    <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm h-48 col-span-2">
-                      <img src={selectedDistrict.imageUrl} alt="Handling Documentation" className="w-full h-full object-cover" />
+          <div className="space-y-12">
+            {selectedDistrictData.map((item, itemIdx) => (
+              <div key={item.id || itemIdx} className="relative pl-8 border-l-2 border-slate-100 pb-12 last:pb-0">
+                <div className={`absolute -left-[11px] top-0 w-5 h-5 rounded-full border-4 border-white shadow-sm ${getStatusColor(item.status)}`}></div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className={`px-3 py-1 rounded-lg text-[10px] font-bold text-white uppercase ${getStatusColor(item.status)}`}>
+                          {item.status === 'Resolved' ? 'Selesai' : item.status === 'In Progress' ? 'Proses' : 'Menunggu'}
+                        </div>
+                        <span className="text-xs text-slate-400 font-medium">ID: {item.id || `NEW-${itemIdx}`}</span>
+                      </div>
                     </div>
-                  )}
-                  {selectedDistrict.mediaUrls?.map((url, idx) => (
-                    <div key={idx} className={`rounded-2xl overflow-hidden border border-slate-100 shadow-sm h-48 ${selectedDistrict.mediaUrls?.length === 1 ? 'col-span-2' : ''}`}>
-                      <img src={url} alt={`Documentation ${idx}`} className="w-full h-full object-cover" />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Lokasi Kejadian</p>
+                        <div className="flex items-center space-x-2">
+                          <MapPin size={14} className="text-slate-400" />
+                          <p className="text-sm font-bold text-slate-700">{item.locationDetail || '-'}</p>
+                        </div>
+                      </div>
+                      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Waktu Kejadian</p>
+                        <div className="flex items-center space-x-2">
+                          <Calendar size={14} className="text-slate-400" />
+                          <p className="text-sm font-bold text-slate-700">{item.incidentTime || '-'}</p>
+                        </div>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Status Saat Ini</p>
-                <div className="flex items-center space-x-3">
-                  <div className={`px-4 py-2 rounded-xl text-xs font-bold text-white uppercase ${getStatusColor(selectedDistrict.status)}`}>
-                    {selectedDistrict.status === 'Resolved' ? 'Selesai' : selectedDistrict.status === 'In Progress' ? 'Dalam Proses' : 'Menunggu'}
+
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tindakan Terakhir</p>
+                      <div className="flex items-start space-x-3">
+                        <History size={16} className="text-blue-500 mt-0.5" />
+                        <p className="text-sm text-slate-700 leading-relaxed font-medium">
+                          {item.lastAction}
+                        </p>
+                      </div>
+                    </div>
+
+                    {((item.mediaUrls && item.mediaUrls.length > 0) || item.imageUrl) && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {item.imageUrl && (
+                          <div className="rounded-xl overflow-hidden border border-slate-100 shadow-sm h-24">
+                            <img src={item.imageUrl} alt="Handling" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        {item.mediaUrls?.map((url, idx) => (
+                          <div key={idx} className="rounded-xl overflow-hidden border border-slate-100 shadow-sm h-24">
+                            <img src={url} alt={`Doc ${idx}`} className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <span className="text-sm text-slate-500 italic">Diperbarui 2 hari yang lalu</span>
-                </div>
-              </div>
 
-              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Tindakan Terakhir</p>
-                <div className="flex items-start space-x-3">
-                  <History size={18} className="text-blue-500 mt-0.5" />
-                  <p className="text-slate-700 font-medium leading-relaxed">
-                    {selectedDistrict.lastAction}
-                  </p>
-                </div>
-              </div>
-            </div>
+                  <div className="space-y-6">
+                    <div className="bg-slate-900 p-6 rounded-2xl text-white relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <CheckCircle2 size={60} />
+                      </div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Ringkasan Kasus</p>
+                      <div className="grid grid-cols-2 gap-4 relative z-10">
+                        <div className="border-b border-slate-800 pb-2">
+                          <span className="text-slate-400 text-[10px] block mb-1">Total Kasus</span>
+                          <span className="text-xl font-black">{item.cases}</span>
+                        </div>
+                        <div className="border-b border-slate-800 pb-2">
+                          <span className="text-slate-400 text-[10px] block mb-1">Massa Terlibat</span>
+                          <span className="text-xl font-black">{item.participantsCount || 0}</span>
+                        </div>
+                      </div>
+                    </div>
 
-            <div className="bg-slate-900 p-8 rounded-3xl text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                <CheckCircle2 size={120} />
+                    {item.details && item.details.length > 0 && (
+                      <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+                        <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+                          <h4 className="text-[10px] font-bold text-slate-800 uppercase tracking-widest">Detail Penanganan</h4>
+                        </div>
+                        <div className="max-h-48 overflow-y-auto">
+                          <table className="w-full text-left text-[11px]">
+                            <thead className="sticky top-0 bg-slate-50 z-10">
+                              <tr>
+                                <th className="px-4 py-2 font-bold text-slate-400 uppercase">Lokasi</th>
+                                <th className="px-4 py-2 font-bold text-slate-400 uppercase">Tindakan</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                              {item.details.map((detail, idx) => (
+                                <tr key={idx} className="hover:bg-slate-50">
+                                  <td className="px-4 py-2 font-bold text-slate-700">{detail.location}</td>
+                                  <td className="px-4 py-2 text-blue-600 font-medium">{detail.action}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Ringkasan Kasus</p>
-              <div className="space-y-4 relative z-10">
-                <div className="flex justify-between items-end border-b border-slate-800 pb-2">
-                  <span className="text-slate-400 text-xs">Total Kasus</span>
-                  <span className="text-2xl font-black">{selectedDistrict.cases}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400">Massa Terlibat</span>
-                  <span className="text-white font-bold">{selectedDistrict.participantsCount || 0} Orang</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400">Lokasi Terakhir</span>
-                  <span className="text-white font-bold truncate max-w-[150px]">{selectedDistrict.locationDetail || '-'}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-400">Waktu Kejadian</span>
-                  <span className="text-white font-bold">{selectedDistrict.incidentTime || '-'}</span>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
-          {/* Detailed Case List */}
-          {selectedDistrict.details && selectedDistrict.details.length > 0 && (
-            <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-              <div className="px-6 py-4 bg-slate-50 border-b border-slate-100">
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest">Daftar Detail Kasus & Penanganan</h4>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-slate-50/50">
-                      <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lokasi</th>
-                      <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Waktu</th>
-                      <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uraian Kejadian</th>
-                      <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tindakan</th>
-                      <th className="px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Keterangan</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {selectedDistrict.details.map((detail, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 text-sm font-bold text-slate-700">{detail.location}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{detail.time}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{detail.description}</td>
-                        <td className="px-6 py-4 text-sm text-blue-600 font-medium">{detail.action}</td>
-                        <td className="px-6 py-4 text-sm text-slate-500 italic">{detail.remarks}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-8 flex justify-end space-x-4">
+          <div className="mt-12 pt-8 border-t border-slate-100 flex justify-end space-x-4">
             <button className="px-6 py-3 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
-              Lihat Riwayat Lengkap
+              Unduh Laporan Wilayah
             </button>
-            <button className="px-6 py-3 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-200 transition-all">
-              Update Progres Baru
+            <button className="px-6 py-3 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-lg transition-all">
+              Tutup Detail
             </button>
           </div>
         </div>
