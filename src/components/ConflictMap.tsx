@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
 import { ConflictData } from '../types';
-import { X, Info, AlertTriangle } from 'lucide-react';
+import { X, Info, AlertTriangle, Upload, Image as ImageIcon } from 'lucide-react';
 
 interface ConflictMapProps {
   data: ConflictData[];
+  customMapImage?: string | null;
+  onMapImageUpload?: (url: string) => void;
 }
 
-export const ConflictMap: React.FC<ConflictMapProps> = ({ data }) => {
+export const ConflictMap: React.FC<ConflictMapProps> = ({ data, customMapImage, onMapImageUpload }) => {
   const [selectedDistrict, setSelectedDistrict] = useState<ConflictData | null>(null);
+
+  const handleMapUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onMapImageUpload) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onMapImageUpload(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -23,10 +36,17 @@ export const ConflictMap: React.FC<ConflictMapProps> = ({ data }) => {
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-slate-800">Peta Potensi Konflik Horizontal</h2>
-          <div className="flex space-x-4 text-xs">
-            <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-red-500 mr-1"></span> Tinggi</div>
-            <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-amber-500 mr-1"></span> Sedang</div>
-            <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-emerald-500 mr-1"></span> Rendah</div>
+          <div className="flex items-center space-x-4">
+            <label className="flex items-center space-x-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg cursor-pointer transition-all border border-slate-200 text-[10px] font-bold uppercase tracking-widest">
+              <Upload size={14} />
+              <span>Import Foto Peta</span>
+              <input type="file" className="hidden" accept="image/*" onChange={handleMapUpload} />
+            </label>
+            <div className="flex space-x-4 text-xs">
+              <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-red-500 mr-1"></span> Tinggi</div>
+              <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-amber-500 mr-1"></span> Sedang</div>
+              <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-emerald-500 mr-1"></span> Rendah</div>
+            </div>
           </div>
         </div>
 
@@ -53,62 +73,90 @@ export const ConflictMap: React.FC<ConflictMapProps> = ({ data }) => {
           ))}
         </div>
 
-        {/* Visual Map Placeholder - Interactive SVG */}
-        <div className="mt-8 p-8 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col items-center justify-center min-h-[400px]">
-          <div className="w-full max-w-4xl">
-            <svg viewBox="0 0 1000 400" className="w-full h-auto drop-shadow-2xl">
-              {/* Simplified NTB Map Shapes */}
-              {/* Lombok Island */}
-              <g transform="translate(50, 50)">
-                <path 
-                  d="M100,50 L250,30 L320,150 L280,300 L120,320 L50,200 Z" 
-                  fill={selectedDistrict?.district.includes('Lombok') || selectedDistrict?.district === 'Mataram' ? '#10b981' : '#e2e8f0'} 
-                  className="transition-all duration-500 cursor-pointer hover:fill-emerald-400"
-                  stroke="#fff" strokeWidth="4"
-                />
-                <text x="180" y="180" className="text-xs font-bold fill-slate-600 pointer-events-none">LOMBOK</text>
-              </g>
-              {/* Sumbawa Island */}
-              <g transform="translate(400, 50)">
-                <path 
-                  d="M50,100 L200,50 L350,80 L550,40 L580,150 L500,280 L300,320 L100,250 Z" 
-                  fill={selectedDistrict?.district.includes('Sumbawa') || selectedDistrict?.district.includes('Bima') || selectedDistrict?.district === 'Dompu' ? '#10b981' : '#e2e8f0'} 
-                  className="transition-all duration-500 cursor-pointer hover:fill-emerald-400"
-                  stroke="#fff" strokeWidth="4"
-                />
-                <text x="300" y="180" className="text-xs font-bold fill-slate-600 pointer-events-none">SUMBAWA</text>
-              </g>
-              
-              {/* District Dots */}
+        {/* Visual Map - Lombok & Sumbawa Image with Interactive Dots */}
+        <div className="mt-8 p-4 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col items-center justify-center min-h-[500px] relative overflow-hidden">
+          <div className="w-full max-w-5xl relative aspect-[2.5/1]">
+            {/* Map Image Background */}
+            <img 
+              src={customMapImage || "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Indonesia_West_Nusa_Tenggara_location_map.svg/1280px-Indonesia_West_Nusa_Tenggara_location_map.svg.png"} 
+              alt="Peta NTB" 
+              className="w-full h-full object-contain opacity-80 mix-blend-multiply"
+              referrerPolicy="no-referrer"
+            />
+            
+            {/* Interactive Overlay Layer */}
+            <svg viewBox="0 0 1280 512" className="absolute inset-0 w-full h-full">
+              {/* District Dots positioned relative to the wikimedia map coordinates */}
               {data.map((item, idx) => {
-                // Approximate positions
+                // Coordinates calibrated for the Wikimedia NTB location map (1280x512 approx)
                 const positions: Record<string, {x: number, y: number}> = {
-                  'Mataram': {x: 180, y: 180},
-                  'Lombok Barat': {x: 160, y: 220},
-                  'Lombok Tengah': {x: 220, y: 230},
-                  'Lombok Timur': {x: 280, y: 200},
-                  'Lombok Utara': {x: 220, y: 100},
-                  'Sumbawa Barat': {x: 480, y: 200},
-                  'Sumbawa': {x: 600, y: 180},
-                  'Dompu': {x: 750, y: 200},
-                  'Bima': {x: 880, y: 180},
-                  'Kota Bima': {x: 900, y: 150},
+                  'Mataram': {x: 185, y: 285},
+                  'Lombok Barat': {x: 175, y: 310},
+                  'Lombok Tengah': {x: 230, y: 320},
+                  'Lombok Timur': {x: 285, y: 290},
+                  'Lombok Utara': {x: 225, y: 245},
+                  'Sumbawa Barat': {x: 460, y: 330},
+                  'Sumbawa': {x: 620, y: 280},
+                  'Dompu': {x: 820, y: 310},
+                  'Bima': {x: 950, y: 320},
+                  'Kota Bima': {x: 965, y: 285},
                 };
                 const pos = positions[item.district] || {x: 0, y: 0};
+                const isSelected = selectedDistrict?.district === item.district;
+                
                 return (
-                  <circle 
-                    key={idx}
-                    cx={pos.x} cy={pos.y} r={selectedDistrict?.district === item.district ? 12 : 8}
-                    className={`${getLevelColor(item.level)} cursor-pointer transition-all duration-300 hover:r-14`}
-                    onClick={() => setSelectedDistrict(item)}
-                  >
-                    <title>{item.district}: {item.incidents} Insiden</title>
-                  </circle>
+                  <g key={idx} onClick={() => setSelectedDistrict(item)} className="cursor-pointer group">
+                    {/* Pulse Effect for High Level */}
+                    {item.level === 'High' && (
+                      <circle 
+                        cx={pos.x} cy={pos.y} r={isSelected ? 25 : 15}
+                        className="fill-red-500/30 animate-ping"
+                      />
+                    )}
+                    
+                    {/* Main Dot */}
+                    <circle 
+                      cx={pos.x} cy={pos.y} 
+                      r={isSelected ? 14 : 10}
+                      className={`${getLevelColor(item.level)} stroke-white stroke-[3px] transition-all duration-300 group-hover:r-16 shadow-xl`}
+                    />
+                    
+                    {/* Label (Visible on hover or selection) */}
+                    <g className={`${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-300`}>
+                      <rect 
+                        x={pos.x + 15} y={pos.y - 35} 
+                        width={120} height={30} 
+                        rx={8} 
+                        className="fill-slate-900/90"
+                      />
+                      <text 
+                        x={pos.x + 25} y={pos.y - 15} 
+                        className="fill-white text-[12px] font-bold pointer-events-none"
+                      >
+                        {item.district}
+                      </text>
+                    </g>
+                  </g>
                 );
               })}
             </svg>
           </div>
-          <p className="mt-6 text-slate-400 text-xs font-medium uppercase tracking-widest">Klik wilayah atau titik untuk detail kejadian</p>
+          
+          <div className="mt-8 flex items-center space-x-8">
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded-full bg-red-500 shadow-lg shadow-red-200"></div>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Potensi Tinggi</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded-full bg-amber-500 shadow-lg shadow-amber-200"></div>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Potensi Sedang</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-lg shadow-emerald-200"></div>
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Potensi Rendah</span>
+            </div>
+          </div>
+          <p className="mt-4 text-slate-400 text-[10px] font-medium uppercase tracking-[0.2em]">Arahkan kursor atau klik titik wilayah untuk detail</p>
         </div>
       </div>
 
@@ -160,6 +208,12 @@ export const ConflictMap: React.FC<ConflictMapProps> = ({ data }) => {
           </div>
 
           <div className="space-y-6">
+            {selectedDistrict.imageUrl && (
+              <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm h-64">
+                <img src={selectedDistrict.imageUrl} alt="Incident" className="w-full h-full object-cover" />
+              </div>
+            )}
+            
             <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Analisis Situasi</p>
               <p className="text-slate-700 leading-relaxed">{selectedDistrict.description}</p>

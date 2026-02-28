@@ -4,8 +4,9 @@ import { Dashboard } from './components/Dashboard';
 import { ConflictMap } from './components/ConflictMap';
 import { ConflictHandlingMap } from './components/ConflictHandlingMap';
 import { OrmasTable } from './components/OrmasTable';
+import { WasnasTable } from './components/WasnasTable';
 import { DataForm } from './components/DataForm';
-import { View, ConflictData, OrmasData, ForeignerData, ConflictHandlingData, ForeignIndividual, ForeignInstitution } from './types';
+import { View, ConflictData, OrmasData, ForeignerData, ConflictHandlingData } from './types';
 import { INITIAL_CONFLICT_DATA, INITIAL_ORMAS_DATA, INITIAL_CONFLICT_HANDLING_DATA, INITIAL_FOREIGNER_DATA } from './constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, User, Search } from 'lucide-react';
@@ -16,8 +17,8 @@ export default function App() {
   const [ormasData, setOrmasData] = useState<OrmasData[]>(INITIAL_ORMAS_DATA);
   const [handlingData, setHandlingData] = useState<ConflictHandlingData[]>(INITIAL_CONFLICT_HANDLING_DATA);
   const [foreignerData, setForeignerData] = useState<ForeignerData[]>(INITIAL_FOREIGNER_DATA);
-  const [foreignIndividuals, setForeignIndividuals] = useState<ForeignIndividual[]>([]);
-  const [foreignInstitutions, setForeignInstitutions] = useState<ForeignInstitution[]>([]);
+  const [customMapImage, setCustomMapImage] = useState<string | null>(null);
+  const [customHandlingMapImage, setCustomHandlingMapImage] = useState<string | null>(null);
 
   const handleUpdateConflict = (newData: ConflictData) => {
     setConflictData(prev => {
@@ -75,36 +76,13 @@ export default function App() {
     setHandlingData(prev => prev.filter(item => item.id !== id));
   };
 
-  const handleUpdateForeignIndividual = (newData: ForeignIndividual) => {
-    setForeignIndividuals(prev => {
-      const exists = prev.find(item => item.id === newData.id);
-      if (exists) return prev.map(item => item.id === newData.id ? newData : item);
-      return [newData, ...prev];
-    });
-  };
-
-  const handleDeleteForeignIndividual = (id: string) => {
-    setForeignIndividuals(prev => prev.filter(item => item.id !== id));
-  };
-
-  const handleUpdateForeignInstitution = (newData: ForeignInstitution) => {
-    setForeignInstitutions(prev => {
-      const exists = prev.find(item => item.id === newData.id);
-      if (exists) return prev.map(item => item.id === newData.id ? newData : item);
-      return [newData, ...prev];
-    });
-  };
-
-  const handleDeleteForeignInstitution = (id: string) => {
-    setForeignInstitutions(prev => prev.filter(item => item.id !== id));
-  };
-
   const renderView = () => {
     switch (currentView) {
       case 'dashboard': return <Dashboard conflictData={conflictData} ormasData={ormasData} foreignerData={foreignerData} />;
-      case 'map': return <ConflictMap data={conflictData} />;
-      case 'handling': return <ConflictHandlingMap data={handlingData} />;
+      case 'map': return <ConflictMap data={conflictData} customMapImage={customMapImage} onMapImageUpload={setCustomMapImage} />;
+      case 'handling': return <ConflictHandlingMap data={handlingData} customMapImage={customHandlingMapImage} onMapImageUpload={setCustomHandlingMapImage} />;
       case 'ormas': return <OrmasTable data={ormasData} />;
+      case 'wasnas': return <WasnasTable data={foreignerData} />;
       case 'input': return (
         <DataForm 
           onUpdateConflict={handleUpdateConflict} 
@@ -115,16 +93,10 @@ export default function App() {
           onDeleteWasnas={handleDeleteWasnas}
           onUpdateHandling={handleUpdateHandling}
           onDeleteHandling={handleDeleteHandling}
-          onUpdateForeignIndividual={handleUpdateForeignIndividual}
-          onDeleteForeignIndividual={handleDeleteForeignIndividual}
-          onUpdateForeignInstitution={handleUpdateForeignInstitution}
-          onDeleteForeignInstitution={handleDeleteForeignInstitution}
           conflictData={conflictData}
           ormasData={ormasData}
           wasnasData={foreignerData}
           handlingData={handlingData}
-          foreignIndividuals={foreignIndividuals}
-          foreignInstitutions={foreignInstitutions}
         />
       );
       default: return <Dashboard conflictData={conflictData} ormasData={ormasData} foreignerData={foreignerData} />;
@@ -137,6 +109,7 @@ export default function App() {
       case 'map': return 'Peta Potensi Konflik';
       case 'handling': return 'Status Penanganan Konflik';
       case 'ormas': return 'Data Sebaran Ormas';
+      case 'wasnas': return 'Data Sebaran Wasnas';
       case 'input': return 'Update Data Lapangan';
       default: return 'Dashboard SIBANGDA';
     }

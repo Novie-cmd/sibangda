@@ -13,31 +13,6 @@ export interface CaseDetail {
   remarks: string;
 }
 
-export interface ForeignIndividual {
-  id: string;
-  name: string;
-  country: string;
-  address: string;
-  gender: 'Laki-laki' | 'Perempuan';
-  occupation: string;
-  stayExpiry: string;
-  description: string;
-  action: string;
-  district: string;
-}
-
-export interface ForeignInstitution {
-  id: string;
-  name: string;
-  address: string;
-  country: string;
-  businessField: string;
-  foreignWorkerCount: number;
-  description: string;
-  action: string;
-  district: string;
-}
-
 export interface ConflictData {
   id: string;
   district: string;
@@ -47,6 +22,7 @@ export interface ConflictData {
   locationDetail?: string;
   incidentTime?: string;
   participantsCount?: number;
+  imageUrl?: string;
   details?: IncidentDetail[];
 }
 
@@ -59,6 +35,7 @@ export interface ConflictHandlingData {
   locationDetail?: string;
   incidentTime?: string;
   participantsCount?: number;
+  imageUrl?: string;
   details?: CaseDetail[];
 }
 
@@ -89,4 +66,4 @@ export interface DashboardStats {
   budgetUtilization: number;
 }
 
-export type View = 'dashboard' | 'map' | 'handling' | 'ormas' | 'input';
+export type View = 'dashboard' | 'map' | 'handling' | 'ormas' | 'input' | 'wasnas';

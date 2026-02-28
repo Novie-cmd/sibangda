@@ -19,6 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) =
     { id: 'map' as View, label: 'Peta Konflik', icon: ShieldAlert },
     { id: 'handling' as View, label: 'Penanganan Konflik', icon: Map },
     { id: 'ormas' as View, label: 'Sebaran Ormas', icon: Users },
+    { id: 'wasnas' as View, label: 'Sebaran Wasnas', icon: Globe },
     { id: 'input' as View, label: 'Input Data', icon: PlusCircle },
   ];
 

@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
 import { ConflictHandlingData } from '../types';
-import { CheckCircle2, Clock, AlertCircle, X, FileText, History } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, X, FileText, History, Upload } from 'lucide-react';
 
 interface ConflictHandlingMapProps {
   data: ConflictHandlingData[];
+  customMapImage?: string | null;
+  onMapImageUpload?: (url: string) => void;
 }
 
-export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data }) => {
+export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data, customMapImage, onMapImageUpload }) => {
   const [selectedDistrict, setSelectedDistrict] = useState<ConflictHandlingData | null>(null);
+
+  const handleMapUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onMapImageUpload) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onMapImageUpload(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -35,45 +48,85 @@ export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data }
             <h2 className="text-lg font-semibold text-slate-800">Peta Penanganan Konflik</h2>
             <p className="text-xs text-slate-500">Status penyelesaian konflik sosial di setiap wilayah</p>
           </div>
-          <div className="flex space-x-4 text-[10px] font-bold uppercase tracking-wider">
-            <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span> Selesai</div>
-            <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-amber-500 mr-2"></span> Proses</div>
-            <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-slate-400 mr-2"></span> Menunggu</div>
+          <div className="flex items-center space-x-4">
+            <label className="flex items-center space-x-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg cursor-pointer transition-all border border-slate-200 text-[10px] font-bold uppercase tracking-widest">
+              <Upload size={14} />
+              <span>Import Foto Peta</span>
+              <input type="file" className="hidden" accept="image/*" onChange={handleMapUpload} />
+            </label>
+            <div className="flex space-x-4 text-[10px] font-bold uppercase tracking-wider">
+              <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span> Selesai</div>
+              <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-amber-500 mr-2"></span> Proses</div>
+              <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-slate-400 mr-2"></span> Menunggu</div>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {data.map((item) => (
-            <div 
-              key={item.district}
-              onClick={() => setSelectedDistrict(item)}
-              className={`p-5 rounded-2xl border transition-all duration-300 group cursor-pointer ${
-                selectedDistrict?.district === item.district
-                  ? 'border-blue-500 bg-blue-50 shadow-lg scale-[1.02]'
-                  : 'border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50'
-              }`}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-sm font-bold text-slate-800">{item.district}</span>
-                <div className={`w-2 h-2 rounded-full ${getStatusColor(item.status)}`}></div>
-              </div>
-              
-              <div className="flex items-baseline space-x-1 mb-3">
-                <span className="text-3xl font-black text-slate-900">{item.cases}</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Kasus</span>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2 text-[10px] font-bold text-slate-600">
-                  {getStatusIcon(item.status)}
-                  <span className="uppercase tracking-wide">{item.status === 'Resolved' ? 'Selesai' : item.status === 'In Progress' ? 'Dalam Proses' : 'Menunggu'}</span>
-                </div>
-                <p className="text-[10px] text-slate-500 italic line-clamp-1 group-hover:line-clamp-none transition-all">
-                  "{item.lastAction}"
-                </p>
-              </div>
-            </div>
-          ))}
+        {/* Visual Map - Lombok & Sumbawa Image with Interactive Dots */}
+        <div className="mt-8 p-4 bg-slate-50 rounded-3xl border border-slate-100 flex flex-col items-center justify-center min-h-[500px] relative overflow-hidden">
+          <div className="w-full max-w-5xl relative aspect-[2.5/1]">
+            {/* Map Image Background */}
+            <img 
+              src={customMapImage || "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Indonesia_West_Nusa_Tenggara_location_map.svg/1280px-Indonesia_West_Nusa_Tenggara_location_map.svg.png"} 
+              alt="Peta NTB" 
+              className="w-full h-full object-contain opacity-80 mix-blend-multiply"
+              referrerPolicy="no-referrer"
+            />
+            
+            {/* Interactive Overlay Layer */}
+            <svg viewBox="0 0 1280 512" className="absolute inset-0 w-full h-full">
+              {data.map((item, idx) => {
+                const positions: Record<string, {x: number, y: number}> = {
+                  'Mataram': {x: 185, y: 285},
+                  'Lombok Barat': {x: 175, y: 310},
+                  'Lombok Tengah': {x: 230, y: 320},
+                  'Lombok Timur': {x: 285, y: 290},
+                  'Lombok Utara': {x: 225, y: 245},
+                  'Sumbawa Barat': {x: 460, y: 330},
+                  'Sumbawa': {x: 620, y: 280},
+                  'Dompu': {x: 820, y: 310},
+                  'Bima': {x: 950, y: 320},
+                  'Kota Bima': {x: 965, y: 285},
+                };
+                const pos = positions[item.district] || {x: 0, y: 0};
+                const isSelected = selectedDistrict?.district === item.district;
+                
+                return (
+                  <g key={idx} onClick={() => setSelectedDistrict(item)} className="cursor-pointer group">
+                    {/* Main Dot */}
+                    <circle 
+                      cx={pos.x} cy={pos.y} 
+                      r={isSelected ? 14 : 10}
+                      className={`${getStatusColor(item.status)} stroke-white stroke-[3px] transition-all duration-300 group-hover:r-16 shadow-xl`}
+                    />
+                    
+                    {/* Label */}
+                    <g className={`${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-300`}>
+                      <rect 
+                        x={pos.x + 15} y={pos.y - 35} 
+                        width={140} height={40} 
+                        rx={8} 
+                        className="fill-slate-900/90"
+                      />
+                      <text 
+                        x={pos.x + 25} y={pos.y - 18} 
+                        className="fill-white text-[12px] font-bold pointer-events-none"
+                      >
+                        {item.district}
+                      </text>
+                      <text 
+                        x={pos.x + 25} y={pos.y - 4} 
+                        className="fill-slate-300 text-[9px] font-medium pointer-events-none uppercase tracking-widest"
+                      >
+                        {item.cases} Kasus
+                      </text>
+                    </g>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+          <p className="mt-8 text-slate-400 text-[10px] font-medium uppercase tracking-[0.2em]">Klik titik wilayah untuk detail penanganan kasus</p>
         </div>
 
         <div className="mt-10 p-6 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center justify-between">
@@ -115,6 +168,11 @@ export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data }
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div className="space-y-6">
+              {selectedDistrict.imageUrl && (
+                <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm h-48">
+                  <img src={selectedDistrict.imageUrl} alt="Handling Documentation" className="w-full h-full object-cover" />
+                </div>
+              )}
               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Status Saat Ini</p>
                 <div className="flex items-center space-x-3">
