@@ -5,7 +5,7 @@ import { ConflictMap } from './components/ConflictMap';
 import { ConflictHandlingMap } from './components/ConflictHandlingMap';
 import { OrmasTable } from './components/OrmasTable';
 import { DataForm } from './components/DataForm';
-import { View, ConflictData, OrmasData, ForeignerData, ConflictHandlingData } from './types';
+import { View, ConflictData, OrmasData, ForeignerData, ConflictHandlingData, ForeignIndividual, ForeignInstitution } from './types';
 import { INITIAL_CONFLICT_DATA, INITIAL_ORMAS_DATA, INITIAL_CONFLICT_HANDLING_DATA, INITIAL_FOREIGNER_DATA } from './constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, User, Search } from 'lucide-react';
@@ -16,6 +16,8 @@ export default function App() {
   const [ormasData, setOrmasData] = useState<OrmasData[]>(INITIAL_ORMAS_DATA);
   const [handlingData, setHandlingData] = useState<ConflictHandlingData[]>(INITIAL_CONFLICT_HANDLING_DATA);
   const [foreignerData, setForeignerData] = useState<ForeignerData[]>(INITIAL_FOREIGNER_DATA);
+  const [foreignIndividuals, setForeignIndividuals] = useState<ForeignIndividual[]>([]);
+  const [foreignInstitutions, setForeignInstitutions] = useState<ForeignInstitution[]>([]);
 
   const handleUpdateConflict = (newData: ConflictData) => {
     setConflictData(prev => {
@@ -73,6 +75,30 @@ export default function App() {
     setHandlingData(prev => prev.filter(item => item.id !== id));
   };
 
+  const handleUpdateForeignIndividual = (newData: ForeignIndividual) => {
+    setForeignIndividuals(prev => {
+      const exists = prev.find(item => item.id === newData.id);
+      if (exists) return prev.map(item => item.id === newData.id ? newData : item);
+      return [newData, ...prev];
+    });
+  };
+
+  const handleDeleteForeignIndividual = (id: string) => {
+    setForeignIndividuals(prev => prev.filter(item => item.id !== id));
+  };
+
+  const handleUpdateForeignInstitution = (newData: ForeignInstitution) => {
+    setForeignInstitutions(prev => {
+      const exists = prev.find(item => item.id === newData.id);
+      if (exists) return prev.map(item => item.id === newData.id ? newData : item);
+      return [newData, ...prev];
+    });
+  };
+
+  const handleDeleteForeignInstitution = (id: string) => {
+    setForeignInstitutions(prev => prev.filter(item => item.id !== id));
+  };
+
   const renderView = () => {
     switch (currentView) {
       case 'dashboard': return <Dashboard conflictData={conflictData} ormasData={ormasData} foreignerData={foreignerData} />;
@@ -89,10 +115,16 @@ export default function App() {
           onDeleteWasnas={handleDeleteWasnas}
           onUpdateHandling={handleUpdateHandling}
           onDeleteHandling={handleDeleteHandling}
+          onUpdateForeignIndividual={handleUpdateForeignIndividual}
+          onDeleteForeignIndividual={handleDeleteForeignIndividual}
+          onUpdateForeignInstitution={handleUpdateForeignInstitution}
+          onDeleteForeignInstitution={handleDeleteForeignInstitution}
           conflictData={conflictData}
           ormasData={ormasData}
           wasnasData={foreignerData}
           handlingData={handlingData}
+          foreignIndividuals={foreignIndividuals}
+          foreignInstitutions={foreignInstitutions}
         />
       );
       default: return <Dashboard conflictData={conflictData} ormasData={ormasData} foreignerData={foreignerData} />;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { ConflictData, OrmasData, ForeignerData, ConflictHandlingData } from '../types';
-import { Save, AlertCircle, Globe, ShieldAlert, Users, Map, Edit2, Trash2, X } from 'lucide-react';
+import { ConflictData, OrmasData, ForeignerData, ConflictHandlingData, ForeignIndividual, ForeignInstitution } from '../types';
+import { Save, AlertCircle, Globe, ShieldAlert, Users, Map, Edit2, Trash2, X, UserCheck, Landmark } from 'lucide-react';
 
 interface DataFormProps {
   onUpdateConflict: (data: ConflictData) => void;
@@ -11,10 +11,16 @@ interface DataFormProps {
   onDeleteWasnas: (id: string) => void;
   onUpdateHandling: (data: ConflictHandlingData) => void;
   onDeleteHandling: (id: string) => void;
+  onUpdateForeignIndividual: (data: ForeignIndividual) => void;
+  onDeleteForeignIndividual: (id: string) => void;
+  onUpdateForeignInstitution: (data: ForeignInstitution) => void;
+  onDeleteForeignInstitution: (id: string) => void;
   conflictData: ConflictData[];
   ormasData: OrmasData[];
   wasnasData: ForeignerData[];
   handlingData: ConflictHandlingData[];
+  foreignIndividuals: ForeignIndividual[];
+  foreignInstitutions: ForeignInstitution[];
 }
 
 export const DataForm: React.FC<DataFormProps> = ({ 
@@ -26,12 +32,18 @@ export const DataForm: React.FC<DataFormProps> = ({
   onDeleteWasnas,
   onUpdateHandling,
   onDeleteHandling,
+  onUpdateForeignIndividual,
+  onDeleteForeignIndividual,
+  onUpdateForeignInstitution,
+  onDeleteForeignInstitution,
   conflictData,
   ormasData,
   wasnasData,
-  handlingData
+  handlingData,
+  foreignIndividuals,
+  foreignInstitutions
 }) => {
-  const [activeTab, setActiveTab] = useState<'conflict' | 'ormas' | 'wasnas' | 'handling'>('conflict');
+  const [activeTab, setActiveTab] = useState<'conflict' | 'ormas' | 'wasnas' | 'handling' | 'foreign_individual' | 'foreign_institution'>('conflict');
   const [editingId, setEditingId] = useState<string | null>(null);
   
   const districts = ['Mataram', 'Lombok Barat', 'Lombok Tengah', 'Lombok Timur', 'Lombok Utara', 'Sumbawa Barat', 'Sumbawa', 'Dompu', 'Bima', 'Kota Bima'];
@@ -78,17 +90,46 @@ export const DataForm: React.FC<DataFormProps> = ({
     participantsCount: 0
   };
 
+  const initialForeignIndividual: ForeignIndividual = {
+    id: '',
+    name: '',
+    country: '',
+    address: '',
+    gender: 'Laki-laki',
+    occupation: '',
+    stayExpiry: '',
+    description: '',
+    action: '',
+    district: 'Mataram'
+  };
+
+  const initialForeignInstitution: ForeignInstitution = {
+    id: '',
+    name: '',
+    address: '',
+    country: '',
+    businessField: '',
+    foreignWorkerCount: 0,
+    description: '',
+    action: '',
+    district: 'Mataram'
+  };
+
   // Forms State
   const [conflictForm, setConflictForm] = useState<ConflictData>(initialConflict);
   const [ormasForm, setOrmasForm] = useState<Partial<OrmasData>>(initialOrmas);
   const [wasnasForm, setWasnasForm] = useState<ForeignerData>(initialWasnas);
   const [handlingForm, setHandlingForm] = useState<ConflictHandlingData>(initialHandling);
+  const [foreignIndividualForm, setForeignIndividualForm] = useState<ForeignIndividual>(initialForeignIndividual);
+  const [foreignInstitutionForm, setForeignInstitutionForm] = useState<ForeignInstitution>(initialForeignInstitution);
 
   const resetForms = () => {
     setConflictForm(initialConflict);
     setOrmasForm(initialOrmas);
     setWasnasForm(initialWasnas);
     setHandlingForm(initialHandling);
+    setForeignIndividualForm(initialForeignIndividual);
+    setForeignInstitutionForm(initialForeignInstitution);
     setEditingId(null);
   };
 
@@ -99,6 +140,8 @@ export const DataForm: React.FC<DataFormProps> = ({
       case 'ormas': setOrmasForm(data); break;
       case 'wasnas': setWasnasForm(data); break;
       case 'handling': setHandlingForm(data); break;
+      case 'foreign_individual': setForeignIndividualForm(data); break;
+      case 'foreign_institution': setForeignInstitutionForm(data); break;
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -110,6 +153,8 @@ export const DataForm: React.FC<DataFormProps> = ({
         case 'ormas': onDeleteOrmas(id); break;
         case 'wasnas': onDeleteWasnas(id); break;
         case 'handling': onDeleteHandling(id); break;
+        case 'foreign_individual': onDeleteForeignIndividual(id); break;
+        case 'foreign_institution': onDeleteForeignInstitution(id); break;
       }
     }
   };
@@ -122,6 +167,8 @@ export const DataForm: React.FC<DataFormProps> = ({
       case 'ormas': onAddOrmas({ ...ormasForm, id } as OrmasData); break;
       case 'wasnas': onUpdateWasnas({ ...wasnasForm, id }); break;
       case 'handling': onUpdateHandling({ ...handlingForm, id }); break;
+      case 'foreign_individual': onUpdateForeignIndividual({ ...foreignIndividualForm, id }); break;
+      case 'foreign_institution': onUpdateForeignInstitution({ ...foreignInstitutionForm, id }); break;
     }
     resetForms();
     alert(editingId ? 'Data berhasil diperbarui!' : 'Data berhasil ditambahkan!');
@@ -130,7 +177,9 @@ export const DataForm: React.FC<DataFormProps> = ({
   const tabs = [
     { id: 'conflict', label: 'Potensi Konflik', icon: ShieldAlert },
     { id: 'handling', label: 'Penanganan Konflik', icon: Map },
-    { id: 'wasnas', label: 'Data Wasnas', icon: Globe },
+    { id: 'wasnas', label: 'Ringkasan Wasnas', icon: Globe },
+    { id: 'foreign_individual', label: 'Orang Asing', icon: UserCheck },
+    { id: 'foreign_institution', label: 'Lembaga Asing', icon: Landmark },
     { id: 'ormas', label: 'Data Ormas', icon: Users },
   ];
 
@@ -292,6 +341,119 @@ export const DataForm: React.FC<DataFormProps> = ({
             </form>
           )}
 
+          {activeTab === 'foreign_individual' && (
+            <form onSubmit={(e) => handleSubmit('foreign_individual', e)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Lengkap</label>
+                  <input type="text" required value={foreignIndividualForm.name} onChange={(e) => setForeignIndividualForm({...foreignIndividualForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Asal Negara</label>
+                  <input type="text" value={foreignIndividualForm.country} onChange={(e) => setForeignIndividualForm({...foreignIndividualForm, country: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jenis Kelamin</label>
+                  <select value={foreignIndividualForm.gender} onChange={(e) => setForeignIndividualForm({...foreignIndividualForm, gender: e.target.value as any})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pekerjaan</label>
+                  <input type="text" value={foreignIndividualForm.occupation} onChange={(e) => setForeignIndividualForm({...foreignIndividualForm, occupation: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Masa Akhir Tinggal</label>
+                  <input type="text" value={foreignIndividualForm.stayExpiry} onChange={(e) => setForeignIndividualForm({...foreignIndividualForm, stayExpiry: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="Contoh: 31 Des 2024" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah (Kab/Kota)</label>
+                  <select value={foreignIndividualForm.district} onChange={(e) => setForeignIndividualForm({...foreignIndividualForm, district: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat di Indonesia</label>
+                <textarea value={foreignIndividualForm.address} onChange={(e) => setForeignIndividualForm({...foreignIndividualForm, address: e.target.value})} rows={2} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uraian</label>
+                  <input type="text" value={foreignIndividualForm.description} onChange={(e) => setForeignIndividualForm({...foreignIndividualForm, description: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tindakan</label>
+                  <input type="text" value={foreignIndividualForm.action} onChange={(e) => setForeignIndividualForm({...foreignIndividualForm, action: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <button type="submit" className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center space-x-2">
+                  <Save size={20} /><span>{editingId ? 'Perbarui Data' : 'Simpan Data Orang Asing'}</span>
+                </button>
+                {editingId && (
+                  <button type="button" onClick={resetForms} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition-all flex items-center justify-center">
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+
+          {activeTab === 'foreign_institution' && (
+            <form onSubmit={(e) => handleSubmit('foreign_institution', e)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama Lembaga</label>
+                  <input type="text" required value={foreignInstitutionForm.name} onChange={(e) => setForeignInstitutionForm({...foreignInstitutionForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Asal Negara</label>
+                  <input type="text" value={foreignInstitutionForm.country} onChange={(e) => setForeignInstitutionForm({...foreignInstitutionForm, country: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Bidang Usaha</label>
+                  <input type="text" value={foreignInstitutionForm.businessField} onChange={(e) => setForeignInstitutionForm({...foreignInstitutionForm, businessField: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Jumlah Tenaga Asing</label>
+                  <input type="number" value={foreignInstitutionForm.foreignWorkerCount} onChange={(e) => setForeignInstitutionForm({...foreignInstitutionForm, foreignWorkerCount: parseInt(e.target.value)})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah (Kab/Kota)</label>
+                  <select value={foreignInstitutionForm.district} onChange={(e) => setForeignInstitutionForm({...foreignInstitutionForm, district: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                    {districts.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alamat Lembaga</label>
+                <textarea value={foreignInstitutionForm.address} onChange={(e) => setForeignInstitutionForm({...foreignInstitutionForm, address: e.target.value})} rows={2} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uraian</label>
+                  <input type="text" value={foreignInstitutionForm.description} onChange={(e) => setForeignInstitutionForm({...foreignInstitutionForm, description: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tindakan</label>
+                  <input type="text" value={foreignInstitutionForm.action} onChange={(e) => setForeignInstitutionForm({...foreignInstitutionForm, action: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <button type="submit" className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-teal-200 transition-all flex items-center justify-center space-x-2">
+                  <Save size={20} /><span>{editingId ? 'Perbarui Data' : 'Simpan Data Lembaga Asing'}</span>
+                </button>
+                {editingId && (
+                  <button type="button" onClick={resetForms} className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition-all flex items-center justify-center">
+                    <X size={20} />
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+
           {activeTab === 'ormas' && (
             <form onSubmit={(e) => handleSubmit('ormas', e)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -382,6 +544,24 @@ export const DataForm: React.FC<DataFormProps> = ({
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
                   </>
                 )}
+                {activeTab === 'foreign_individual' && (
+                  <>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Negara</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Masa Berlaku</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wilayah</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
+                  </>
+                )}
+                {activeTab === 'foreign_institution' && (
+                  <>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Lembaga</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Negara</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Bidang</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">TKA</th>
+                    <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
+                  </>
+                )}
                 {activeTab === 'ormas' && (
                   <>
                     <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nama</th>
@@ -456,6 +636,42 @@ export const DataForm: React.FC<DataFormProps> = ({
                         <Edit2 size={14} />
                       </button>
                       <button onClick={() => handleDelete('wasnas', item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {activeTab === 'foreign_individual' && foreignIndividuals.map((item, idx) => (
+                <tr key={item.id || idx} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 text-sm font-bold text-slate-800">{item.name}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.country}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.stayExpiry}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.district}</td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button onClick={() => handleEdit('foreign_individual', item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <Edit2 size={14} />
+                      </button>
+                      <button onClick={() => handleDelete('foreign_individual', item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {activeTab === 'foreign_institution' && foreignInstitutions.map((item, idx) => (
+                <tr key={item.id || idx} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4 text-sm font-bold text-slate-800">{item.name}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.country}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.businessField}</td>
+                  <td className="px-6 py-4 text-sm text-slate-600">{item.foreignWorkerCount}</td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button onClick={() => handleEdit('foreign_institution', item)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <Edit2 size={14} />
+                      </button>
+                      <button onClick={() => handleDelete('foreign_institution', item.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                         <Trash2 size={14} />
                       </button>
                     </div>
