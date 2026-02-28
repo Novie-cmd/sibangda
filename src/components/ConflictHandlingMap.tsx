@@ -77,16 +77,16 @@ export const ConflictHandlingMap: React.FC<ConflictHandlingMapProps> = ({ data, 
             <svg viewBox="0 0 1280 512" className="absolute inset-0 w-full h-full">
               {data.map((item, idx) => {
                 const positions: Record<string, {x: number, y: number}> = {
-                  'Mataram': {x: 185, y: 285},
-                  'Lombok Barat': {x: 175, y: 310},
-                  'Lombok Tengah': {x: 230, y: 320},
-                  'Lombok Timur': {x: 285, y: 290},
-                  'Lombok Utara': {x: 225, y: 245},
-                  'Sumbawa Barat': {x: 460, y: 330},
-                  'Sumbawa': {x: 620, y: 280},
-                  'Dompu': {x: 820, y: 310},
-                  'Bima': {x: 950, y: 320},
-                  'Kota Bima': {x: 965, y: 285},
+                  'Mataram': {x: 135, y: 275},
+                  'Lombok Barat': {x: 125, y: 315},
+                  'Lombok Tengah': {x: 190, y: 345},
+                  'Lombok Timur': {x: 255, y: 305},
+                  'Lombok Utara': {x: 195, y: 215},
+                  'Sumbawa Barat': {x: 410, y: 325},
+                  'Sumbawa': {x: 590, y: 285},
+                  'Dompu': {x: 840, y: 315},
+                  'Bima': {x: 1010, y: 305},
+                  'Kota Bima': {x: 1000, y: 275},
                 };
                 const pos = positions[item.district] || {x: 0, y: 0};
                 const isSelected = selectedDistrict?.district === item.district;
